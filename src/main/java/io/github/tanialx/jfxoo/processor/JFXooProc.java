@@ -1,12 +1,15 @@
 package io.github.tanialx.jfxoo.processor;
 
+import com.squareup.javapoet.JavaFile;
 import io.github.tanialx.jfxoo.annotation.JFXooForm;
+import io.github.tanialx.jfxoo.processor.gnrt.FormGnrt;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,7 +26,12 @@ public class JFXooProc extends AbstractProcessor {
                 .stream()
                 .filter(e -> e.getKind() == ElementKind.CLASS)
                 .forEach(e -> {
-                   // TODO: Generate code for JFXooForm
+                    JavaFile jf = new FormGnrt(processingEnv).run((TypeElement) e);
+                    try {
+                        jf.writeTo(this.processingEnv.getFiler());
+                    } catch (IOException ex) {
+                        throw new RuntimeException();
+                    }
                 });
         return true;
     }
