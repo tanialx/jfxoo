@@ -1,19 +1,22 @@
 plugins {
     id 'java'
+    id 'java-library'
     id 'org.openjfx.javafxplugin' version '0.0.10'
+    id 'maven-publish'
 }
 
 group 'io.github.tanialx'
-version '0.0.1-SNAPSHOT'
+version '0.0.1'
 
 javafx {
     version = "17"
-    modules = [ 'javafx.controls' ]
+    modules = ['javafx.controls']
     configuration = 'compileOnly'
 }
 
 repositories {
     mavenCentral()
+    mavenLocal()
 }
 
 dependencies {
@@ -32,5 +35,14 @@ test {
         jvmArgs = [
                 '--add-opens', 'jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED'
         ]
+    }
+}
+}
+
+publishing {
+    publications {
+        jfxooPub(MavenPublication) {
+            from components.java
+        }
     }
 }
