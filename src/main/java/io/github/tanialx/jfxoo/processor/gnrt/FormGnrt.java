@@ -9,12 +9,12 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 import java.util.List;
 
+import static io.github.tanialx.jfxoo.processor.gnrt.Helper.labelFormat;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 public class FormGnrt {
@@ -51,11 +51,11 @@ public class FormGnrt {
             String fieldName = f.getSimpleName().toString();
             String labelName = "label_" + fieldName;
             String txtfName = "txtF_" + fieldName;
-            mb.addStatement("$T $L = new $T($S)", Label.class, labelName, Label.class, fieldName);
+            mb.addStatement("$T $L = new $T($S)", Label.class, labelName, Label.class, labelFormat(fieldName));
             mb.addStatement("$T $L = new $T()", TextField.class, txtfName, TextField.class);
-            mb.addStatement("this.add(label_title, $L, $L)", col, row);
+            mb.addStatement("this.add($L, $L, $L)", labelName, col, row);
             col++;
-            mb.addStatement("this.add(txtF_title, $L, $L)", col, row);
+            mb.addStatement("this.add($L, $L, $L)", txtfName, col, row);
             row++;
             col = 0;
         }
