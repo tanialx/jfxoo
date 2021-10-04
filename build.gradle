@@ -37,7 +37,6 @@ test {
         ]
     }
 }
-}
 
 publishing {
     publications {
