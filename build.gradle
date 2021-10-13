@@ -1,18 +1,11 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'maven-publish'
 }
 
 group 'io.github.tanialx'
 version '0.0.1'
-
-javafx {
-    version = "17"
-    modules = ['javafx.controls']
-    configuration = 'compileOnly'
-}
 
 repositories {
     mavenCentral()

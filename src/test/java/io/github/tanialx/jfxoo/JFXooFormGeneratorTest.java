@@ -29,8 +29,13 @@ public class JFXooFormGeneratorTest {
         // Generated file package is present and has the correct content
         assertThat(compilation)
                 .generatedFile(SOURCE_OUTPUT,
+                        "io.github.tanialx.jfxoo",
+                        "JFXooCreatorImpl.java")
+                .hasSourceEquivalentTo(fromResource("ExpectedJFXooCreatorImpl.java"));
+        assertThat(compilation)
+                .generatedFile(SOURCE_OUTPUT,
                 "io.github.tanialx.jfxoo.test",
-                "JFXooFormBook.java")
-                .hasSourceEquivalentTo(fromResource("JFXooFormBook.java"));
+                        "JFXooFormBook.java")
+                .hasSourceEquivalentTo(fromResource("ExpectedJFXooFormBook.java"));
     }
 }
