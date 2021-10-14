@@ -1,6 +1,8 @@
 package io.github.tanialx.jfxoo.test;
 
 import io.github.tanialx.jfxoo.JFXooForm;
+import java.lang.Object;
+import java.lang.Override;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -18,7 +20,8 @@ public class JFXooFormBook implements JFXooForm {
         _layout();
     }
 
-    public GridPane node() {
+    @Override
+    public Object node() {
         return grid;
     }
 

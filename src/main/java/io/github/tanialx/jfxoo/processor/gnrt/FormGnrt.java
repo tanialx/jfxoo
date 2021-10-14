@@ -44,7 +44,8 @@ public class FormGnrt {
 
     private MethodSpec get() {
         MethodSpec.Builder mb = MethodSpec.methodBuilder("node");
-        mb.returns(GRIDPANE);
+        mb.addAnnotation(Override.class);
+        mb.returns(Object.class);
         mb.addModifiers(PUBLIC);
         mb.addStatement("return grid");
         return mb.build();
