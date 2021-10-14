@@ -6,6 +6,7 @@ import io.github.tanialx.jfxoo.processor.gnrt.CreatorGnrt;
 import io.github.tanialx.jfxoo.processor.gnrt.FormGnrt;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
@@ -15,10 +16,21 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class JFXooProc extends AbstractProcessor {
 
-    private final List<JavaFile> fs = new ArrayList<>();
+    private final List<TypeElement> tes = new ArrayList<>();
+    private CreatorGnrt creatorGnrt;
+    private FormGnrt formGnrt;
+    private boolean CREATOR_WRITTEN = false;
+
+    @Override
+    public synchronized void init(ProcessingEnvironment processingEnv) {
+        super.init(processingEnv);
+        creatorGnrt = new CreatorGnrt(processingEnv);
+        formGnrt = new FormGnrt(processingEnv);
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -28,26 +40,31 @@ public class JFXooProc extends AbstractProcessor {
          * and write to 'generated' output path
          */
         if (!roundEnv.processingOver()) {
-            final CreatorGnrt creatorGnrt = new CreatorGnrt(processingEnv);
-            roundEnv.getElementsAnnotatedWith(JFXooForm.class)
+            tes.addAll(roundEnv.getElementsAnnotatedWith(JFXooForm.class)
                     .stream()
                     .filter(e -> e.getKind() == ElementKind.CLASS)
                     .map(e -> (TypeElement) e)
-                    .forEach(te -> {
-                        creatorGnrt.add(te);
-                        fs.add(new FormGnrt(processingEnv).run(te));
-                    });
-            fs.add(creatorGnrt.run());
+                    .collect(Collectors.toList()));
         } else {
-            fs.forEach(f -> {
-                try {
-                    f.writeTo(this.processingEnv.getFiler());
-                } catch (IOException ex) {
-                    throw new RuntimeException();
-                }
+            tes.forEach(te -> {
+                this.output(formGnrt.run(te));
+                creatorGnrt.add(te);
             });
+            if (!CREATOR_WRITTEN && this.output(creatorGnrt.run())) {
+                CREATOR_WRITTEN = true;
+            }
         }
         return false;
+    }
+
+    private boolean output(JavaFile f) {
+        try {
+            f.writeTo(this.processingEnv.getFiler());
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
