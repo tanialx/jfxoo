@@ -9,6 +9,8 @@ import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,9 +48,37 @@ public class FormGnrt {
                         .addMethod(constructor())
                         .addMethod(layout(te))
                         .addMethod(JFXooForm_init(te))
+                        .addMethod(JFXooForm_value(te))
                         .build())
                 .indent("    ")
                 .build();
+    }
+
+    private MethodSpec JFXooForm_value(TypeElement te) {
+        TypeName type = TypeName.get(te.asType());
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("value");
+        mb.addModifiers(PUBLIC);
+        mb.addAnnotation(Override.class);
+        mb.returns(type);
+        final String OBJ_VAR = "t";
+        mb.addStatement("$T $L = new $T()", type, OBJ_VAR, type);
+        List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
+        for (VariableElement f : fs) {
+            String fieldName = f.getSimpleName().toString();
+            String txtfName = "txtF_" + fieldName;
+            String setter = String.format("set%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
+            if (types.isSameType(f.asType(), elements.getTypeElement(String.class.getCanonicalName()).asType())) {
+                mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, txtfName);
+            } else if (types.isSameType(f.asType(), elements.getTypeElement(LocalDate.class.getCanonicalName()).asType())) {
+                mb.addStatement("$L.$L($T.parse($L.getText()))", OBJ_VAR, setter, LocalDate.class, txtfName);
+            } else if (types.isSameType(f.asType(), elements.getTypeElement(BigDecimal.class.getCanonicalName()).asType())) {
+                mb.addStatement("$L.$L(new $T($L.getText()))", OBJ_VAR, setter, BigDecimal.class, txtfName);
+            } else {
+                mb.addStatement("$L.$L(\"\")", OBJ_VAR, setter);
+            }
+        }
+        mb.addStatement("return $L", OBJ_VAR);
+        return mb.build();
     }
 
     private MethodSpec JFXooForm_init(TypeElement te) {

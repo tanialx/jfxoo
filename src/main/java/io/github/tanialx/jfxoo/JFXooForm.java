@@ -7,4 +7,6 @@ public interface JFXooForm<T> {
     Node node();
 
     void init(T t);
+
+    T value();
 }

@@ -1,7 +1,11 @@
 package io.github.tanialx.jfxoo.test;
 
 import io.github.tanialx.jfxoo.JFXooForm;
+
 import java.lang.Override;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -57,5 +61,15 @@ public class JFXooFormBook implements JFXooForm<Book> {
         txtF_author.setText(book.getAuthor());
         txtF_published.setText(book.getPublished().toString());
         txtF_price.setText(book.getPrice().toString());
+    }
+
+    @Override
+    public Book value() {
+        Book t = new Book();
+        t.setTitle(txtF_title.getText());
+        t.setAuthor(txtF_author.getText());
+        t.setPublished(LocalDate.parse(txtF_published.getText()));
+        t.setPrice(new BigDecimal(txtF_price.getText()));
+        return t;
     }
 }
