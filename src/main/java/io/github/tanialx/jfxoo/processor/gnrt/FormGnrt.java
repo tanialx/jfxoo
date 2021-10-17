@@ -67,6 +67,7 @@ public class FormGnrt {
             String fieldName = f.getSimpleName().toString();
             String txtfName = "txtF_" + fieldName;
             String setter = String.format("set%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
+            // TODO: handle different data types
             if (types.isSameType(f.asType(), elements.getTypeElement(String.class.getCanonicalName()).asType())) {
                 mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, txtfName);
             } else if (types.isSameType(f.asType(), elements.getTypeElement(LocalDate.class.getCanonicalName()).asType())) {
@@ -95,6 +96,7 @@ public class FormGnrt {
             String fieldName = f.getSimpleName().toString();
             String txtfName = "txtF_" + fieldName;
             String getter = String.format("get%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
+            // TODO: handle different data types
             if (types.isSameType(f.asType(), elements.getTypeElement(String.class.getCanonicalName()).asType())) {
                 mb.addStatement("$L.setText($L.$L())", txtfName, paramName, getter);
             } else {
@@ -105,6 +107,12 @@ public class FormGnrt {
     }
 
     private List<FieldSpec> props(TypeElement te) {
+        // TODO: ui controls for simple data types
+        // String   -> TextField
+        // Number   -> TextField
+        // Enum     -> Dropdown
+        // Boolean  -> Checkbox
+        // Date     -> Date Picker (?)
         List<FieldSpec> fss = new ArrayList<>();
         fss.add(FieldSpec.builder(GRIDPANE, "grid", PRIVATE).build());
         List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
@@ -126,6 +134,7 @@ public class FormGnrt {
     }
 
     private MethodSpec layout(TypeElement te) {
+        // TODO: Form controls (Save, Cancel buttons)
         MethodSpec.Builder mb = MethodSpec.methodBuilder("_layout");
         mb.addModifiers(PRIVATE);
         int row = 0;
