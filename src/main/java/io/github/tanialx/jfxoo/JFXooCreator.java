@@ -2,5 +2,5 @@ package io.github.tanialx.jfxoo;
 
 public interface JFXooCreator {
 
-    JFXooForm create(String name);
+    <T> JFXooForm<T> create(String name, Class<T> T);
 }

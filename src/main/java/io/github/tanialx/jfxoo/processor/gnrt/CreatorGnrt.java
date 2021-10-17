@@ -42,18 +42,23 @@ public class CreatorGnrt {
 
     private MethodSpec _create() {
         Elements elements = procEnv.getElementUtils();
+        final TypeVariableName TYPE_VAR = TypeVariableName.get("T");
+        final TypeName FORM_TYPE = ParameterizedTypeName.get(ClassName.get(JFXooForm.class), TYPE_VAR);
         MethodSpec.Builder mb = MethodSpec.methodBuilder("create");
-        mb.returns(JFXooForm.class);
+        mb.addTypeVariable(TYPE_VAR);
+        mb.returns(FORM_TYPE);
         mb.addModifiers(PUBLIC);
         mb.addAnnotation(Override.class);
         mb.addParameter(ParameterSpec.builder(String.class, "name").build());
-        mb.addStatement("$T form = null", JFXooForm.class);
+        mb.addParameter(ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Class.class), TYPE_VAR), "T").build());
+        mb.addStatement("$T form = null", FORM_TYPE);
         CodeBlock.Builder cb = CodeBlock.builder();
         cb.beginControlFlow("switch(name)");
         tes.forEach(te -> {
             ClassName generatedClass = ClassName.get(elements.getPackageOf(te).toString(),
                     "JFXooForm" + te.getSimpleName().toString());
-            cb.addStatement("case $S -> form = new $T()", te.getSimpleName().toString(), generatedClass);
+            cb.addStatement("case $S -> form = ($T) new $T()", te.getSimpleName().toString(),
+                    FORM_TYPE, generatedClass);
         });
         cb.addStatement("default -> form = null");
         cb.endControlFlow();

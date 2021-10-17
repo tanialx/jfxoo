@@ -22,7 +22,7 @@ public class JFXoo {
         return _instance;
     }
 
-    public JFXooForm get(String name) {
-        return creator.create(name);
+    public <T> JFXooForm<T> get(String name, Class<T> T) {
+        return creator.create(name, T);
     }
 }
