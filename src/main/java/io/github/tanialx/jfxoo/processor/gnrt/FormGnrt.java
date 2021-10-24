@@ -4,6 +4,7 @@ import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooForm;
 
 import javax.annotation.processing.ProcessingEnvironment;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.ElementFilter;
@@ -65,15 +66,15 @@ public class FormGnrt {
         List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
         for (VariableElement f : fs) {
             String fieldName = f.getSimpleName().toString();
-            String txtfName = "txtF_" + fieldName;
+            String inputName = "in_" + fieldName;
             String setter = String.format("set%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
             // TODO: handle different data types
-            if (types.isSameType(f.asType(), elements.getTypeElement(String.class.getCanonicalName()).asType())) {
-                mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, txtfName);
-            } else if (types.isSameType(f.asType(), elements.getTypeElement(LocalDate.class.getCanonicalName()).asType())) {
-                mb.addStatement("$L.$L($T.parse($L.getText()))", OBJ_VAR, setter, LocalDate.class, txtfName);
-            } else if (types.isSameType(f.asType(), elements.getTypeElement(BigDecimal.class.getCanonicalName()).asType())) {
-                mb.addStatement("$L.$L(new $T($L.getText()))", OBJ_VAR, setter, BigDecimal.class, txtfName);
+            if (sameType(f, String.class)) {
+                mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, inputName);
+            } else if (sameType(f, LocalDate.class)) {
+                mb.addStatement("$L.$L($T.parse($L.getText()))", OBJ_VAR, setter, LocalDate.class, inputName);
+            } else if (sameType(f, BigDecimal.class)) {
+                mb.addStatement("$L.$L(new $T($L.getText()))", OBJ_VAR, setter, BigDecimal.class, inputName);
             } else {
                 mb.addStatement("$L.$L(\"\")", OBJ_VAR, setter);
             }
@@ -94,13 +95,13 @@ public class FormGnrt {
         List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
         for (VariableElement f : fs) {
             String fieldName = f.getSimpleName().toString();
-            String txtfName = "txtF_" + fieldName;
+            String inputName = "in_" + fieldName;
             String getter = String.format("get%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
             // TODO: handle different data types
-            if (types.isSameType(f.asType(), elements.getTypeElement(String.class.getCanonicalName()).asType())) {
-                mb.addStatement("$L.setText($L.$L())", txtfName, paramName, getter);
+            if (sameType(f, String.class)) {
+                mb.addStatement("$L.setText($L.$L())", inputName, paramName, getter);
             } else {
-                mb.addStatement("$L.setText($L.$L().toString())", txtfName, paramName, getter);
+                mb.addStatement("$L.setText($L.$L().toString())", inputName, paramName, getter);
             }
         }
         return mb.build();
@@ -118,8 +119,8 @@ public class FormGnrt {
         List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
         for (VariableElement f : fs) {
             String fieldName = f.getSimpleName().toString();
-            String txtfName = "txtF_" + fieldName;
-            fss.add(FieldSpec.builder(TEXTFIELD, txtfName, PRIVATE).build());
+            String inputName = "in_" + fieldName;
+            fss.add(FieldSpec.builder(TEXTFIELD, inputName, PRIVATE).build());
         }
         return fss;
     }
@@ -144,12 +145,12 @@ public class FormGnrt {
         for (VariableElement f : fs) {
             String fieldName = f.getSimpleName().toString();
             String labelName = "label_" + fieldName;
-            String txtfName = "txtF_" + fieldName;
+            String inputName = "in_" + fieldName;
             mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(fieldName));
-            mb.addStatement("$L = new $T()", txtfName, TEXTFIELD);
+            mb.addStatement("$L = new $T()", inputName, TEXTFIELD);
             mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
             col++;
-            mb.addStatement("grid.add($L, $L, $L)", txtfName, col, row);
+            mb.addStatement("grid.add($L, $L, $L)", inputName, col, row);
             row++;
             col = 0;
         }
@@ -165,5 +166,9 @@ public class FormGnrt {
         mb.addStatement("grid.setVgap($L)", 10);
         mb.addStatement("_layout()");
         return mb.build();
+    }
+
+    public boolean sameType(Element e, Class<?> c) {
+        return types.isSameType(e.asType(), elements.getTypeElement(c.getCanonicalName()).asType());
     }
 }

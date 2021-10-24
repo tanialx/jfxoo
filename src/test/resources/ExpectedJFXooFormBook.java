@@ -15,10 +15,10 @@ import javafx.scene.layout.GridPane;
 public class JFXooFormBook implements JFXooForm<Book> {
 
     private GridPane grid;
-    private TextField txtF_title;
-    private TextField txtF_author;
-    private TextField txtF_published;
-    private TextField txtF_price;
+    private TextField in_title;
+    private TextField in_author;
+    private TextField in_published;
+    private TextField in_price;
 
     public JFXooFormBook() {
         grid = new GridPane();
@@ -35,41 +35,41 @@ public class JFXooFormBook implements JFXooForm<Book> {
 
     private void _layout() {
         Label label_title = new Label("Title");
-        txtF_title = new TextField();
+        in_title = new TextField();
         grid.add(label_title, 0, 0);
-        grid.add(txtF_title, 1, 0);
+        grid.add(in_title, 1, 0);
 
         Label label_author = new Label("Author");
-        txtF_author = new TextField();
+        in_author = new TextField();
         grid.add(label_author, 0, 1);
-        grid.add(txtF_author, 1, 1);
+        grid.add(in_author, 1, 1);
 
         Label label_published = new Label("Published");
-        txtF_published = new TextField();
+        in_published = new TextField();
         grid.add(label_published, 0, 2);
-        grid.add(txtF_published, 1, 2);
+        grid.add(in_published, 1, 2);
 
         Label label_price = new Label("Price");
-        txtF_price = new TextField();
+        in_price = new TextField();
         grid.add(label_price, 0, 3);
-        grid.add(txtF_price, 1, 3);
+        grid.add(in_price, 1, 3);
     }
 
     @Override
     public void init(Book book) {
-        txtF_title.setText(book.getTitle());
-        txtF_author.setText(book.getAuthor());
-        txtF_published.setText(book.getPublished().toString());
-        txtF_price.setText(book.getPrice().toString());
+        in_title.setText(book.getTitle());
+        in_author.setText(book.getAuthor());
+        in_published.setText(book.getPublished().toString());
+        in_price.setText(book.getPrice().toString());
     }
 
     @Override
     public Book value() {
         Book t = new Book();
-        t.setTitle(txtF_title.getText());
-        t.setAuthor(txtF_author.getText());
-        t.setPublished(LocalDate.parse(txtF_published.getText()));
-        t.setPrice(new BigDecimal(txtF_price.getText()));
+        t.setTitle(in_title.getText());
+        t.setAuthor(in_author.getText());
+        t.setPublished(LocalDate.parse(in_published.getText()));
+        t.setPrice(new BigDecimal(in_price.getText()));
         return t;
     }
 }
