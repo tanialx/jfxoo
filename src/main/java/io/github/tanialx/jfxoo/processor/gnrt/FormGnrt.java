@@ -2,7 +2,7 @@ package io.github.tanialx.jfxoo.processor.gnrt;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooForm;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -35,13 +35,13 @@ public class FormGnrt {
 
     private List<Field> fs;
 
-    @AllArgsConstructor
+    @Builder
     @Getter
     @Setter
     public static class Field {
         private String name;
         private TypeMirror type;
-        private String nameInForm;
+        private String inputControlName;
         private String getter;
         private String setter;
     }
@@ -54,11 +54,14 @@ public class FormGnrt {
     private List<Field> fields(TypeElement te) {
         return ElementFilter.fieldsIn(te.getEnclosedElements()).stream().map(ve -> {
             String fieldName = ve.getSimpleName().toString();
-            String nameInForm = "in_" + fieldName;
             String nameInMethod = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
-            String setter = String.format("set%s", nameInMethod);
-            String getter = String.format("get%s", nameInMethod);
-            return new Field(fieldName, ve.asType(), nameInForm, getter, setter);
+            return Field.builder()
+                    .name(fieldName)
+                    .getter(String.format("set%s", nameInMethod))
+                    .setter(String.format("get%s", nameInMethod))
+                    .inputControlName("in_" + fieldName)
+                    .type(ve.asType())
+                    .build();
         }).collect(Collectors.toList());
     }
 
@@ -96,7 +99,7 @@ public class FormGnrt {
         final String OBJ_VAR = "t";
         mb.addStatement("$T $L = new $T()", type, OBJ_VAR, type);
         for (Field f : fs) {
-            String inputName = f.getNameInForm();
+            String inputName = f.getInputControlName();
             String setter = f.getSetter();
             // TODO: handle different data types
             if (sameType(f, String.class)) {
@@ -125,7 +128,7 @@ public class FormGnrt {
         mb.addParameter(ParameterSpec.builder(paramType, paramName).build());
 
         for (Field f : fs) {
-            String inputName = f.getNameInForm();
+            String inputName = f.getInputControlName();
             String getter = f.getGetter();
             // TODO: handle different data types
             if (sameType(f, LocalDate.class)) {
@@ -150,9 +153,9 @@ public class FormGnrt {
         fss.add(FieldSpec.builder(GRIDPANE, "grid", PRIVATE).build());
         for (Field f : fs) {
             if (sameType(f, LocalDate.class)) {
-                fss.add(FieldSpec.builder(DATEPICKER, f.getNameInForm(), PRIVATE).build());
+                fss.add(FieldSpec.builder(DATEPICKER, f.getInputControlName(), PRIVATE).build());
             } else {
-                fss.add(FieldSpec.builder(TEXTFIELD, f.getNameInForm(), PRIVATE).build());
+                fss.add(FieldSpec.builder(TEXTFIELD, f.getInputControlName(), PRIVATE).build());
             }
         }
         return fss;
@@ -176,7 +179,7 @@ public class FormGnrt {
 
         for (Field f : fs) {
             String labelName = "label_" + f.getName();
-            String inputName = f.getNameInForm();
+            String inputName = f.getInputControlName();
             mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(f.getName()));
             if (sameType(f, LocalDate.class)) {
                 mb.addStatement("$L = new $T()", inputName, DATEPICKER);
