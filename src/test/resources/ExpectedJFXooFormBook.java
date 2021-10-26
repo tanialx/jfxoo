@@ -4,10 +4,10 @@ import io.github.tanialx.jfxoo.JFXooForm;
 
 import java.lang.Override;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -17,7 +17,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
     private GridPane grid;
     private TextField in_title;
     private TextField in_author;
-    private TextField in_published;
+    private DatePicker in_published;
     private TextField in_price;
 
     public JFXooFormBook() {
@@ -45,7 +45,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         grid.add(in_author, 1, 1);
 
         Label label_published = new Label("Published");
-        in_published = new TextField();
+        in_published = new DatePicker();
         grid.add(label_published, 0, 2);
         grid.add(in_published, 1, 2);
 
@@ -59,7 +59,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
     public void init(Book book) {
         in_title.setText(book.getTitle());
         in_author.setText(book.getAuthor());
-        in_published.setText(book.getPublished().toString());
+        in_published.setValue(book.getPublished());
         in_price.setText(book.getPrice().toString());
     }
 
@@ -68,7 +68,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         Book t = new Book();
         t.setTitle(in_title.getText());
         t.setAuthor(in_author.getText());
-        t.setPublished(LocalDate.parse(in_published.getText()));
+        t.setPublished(in_published.getValue());
         t.setPrice(new BigDecimal(in_price.getText()));
         return t;
     }

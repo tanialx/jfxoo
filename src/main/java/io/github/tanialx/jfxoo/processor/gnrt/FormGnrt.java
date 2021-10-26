@@ -31,6 +31,8 @@ public class FormGnrt {
     private final ClassName POS = ClassName.get("javafx.geometry", "Pos");
     private final ClassName GRIDPANE = ClassName.get("javafx.scene.layout", "GridPane");
     private final ClassName NODE = ClassName.get("javafx.scene", "Node");
+    private final ClassName DATEPICKER = ClassName.get("javafx.scene.control", "DatePicker");
+
     private List<Field> fs;
 
     @AllArgsConstructor
@@ -100,9 +102,11 @@ public class FormGnrt {
             if (sameType(f, String.class)) {
                 mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, inputName);
             } else if (sameType(f, LocalDate.class)) {
-                mb.addStatement("$L.$L($T.parse($L.getText()))", OBJ_VAR, setter, LocalDate.class, inputName);
+                mb.addStatement("$L.$L($L.getValue())", OBJ_VAR, setter, inputName);
             } else if (sameType(f, BigDecimal.class)) {
                 mb.addStatement("$L.$L(new $T($L.getText()))", OBJ_VAR, setter, BigDecimal.class, inputName);
+            } else if (sameType(f, Integer.class)) {
+                mb.addStatement("$L.$L($T.parseInt($L.getText()))", OBJ_VAR, setter, Integer.class, inputName);
             } else {
                 mb.addStatement("$L.$L(\"\")", OBJ_VAR, setter);
             }
@@ -121,11 +125,12 @@ public class FormGnrt {
         mb.addParameter(ParameterSpec.builder(paramType, paramName).build());
 
         for (Field f : fs) {
-            String fieldName = f.getName();
             String inputName = f.getNameInForm();
-            String getter = String.format("get%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
+            String getter = f.getGetter();
             // TODO: handle different data types
-            if (sameType(f, String.class)) {
+            if (sameType(f, LocalDate.class)) {
+                mb.addStatement("$L.setValue($L.$L())", inputName, paramName, getter);
+            } else if (sameType(f, String.class)) {
                 mb.addStatement("$L.setText($L.$L())", inputName, paramName, getter);
             } else {
                 mb.addStatement("$L.setText($L.$L().toString())", inputName, paramName, getter);
@@ -144,7 +149,11 @@ public class FormGnrt {
         List<FieldSpec> fss = new ArrayList<>();
         fss.add(FieldSpec.builder(GRIDPANE, "grid", PRIVATE).build());
         for (Field f : fs) {
-            fss.add(FieldSpec.builder(TEXTFIELD, f.getNameInForm(), PRIVATE).build());
+            if (sameType(f, LocalDate.class)) {
+                fss.add(FieldSpec.builder(DATEPICKER, f.getNameInForm(), PRIVATE).build());
+            } else {
+                fss.add(FieldSpec.builder(TEXTFIELD, f.getNameInForm(), PRIVATE).build());
+            }
         }
         return fss;
     }
@@ -169,7 +178,11 @@ public class FormGnrt {
             String labelName = "label_" + f.getName();
             String inputName = f.getNameInForm();
             mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(f.getName()));
-            mb.addStatement("$L = new $T()", inputName, TEXTFIELD);
+            if (sameType(f, LocalDate.class)) {
+                mb.addStatement("$L = new $T()", inputName, DATEPICKER);
+            } else {
+                mb.addStatement("$L = new $T()", inputName, TEXTFIELD);
+            }
             mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
             col++;
             mb.addStatement("grid.add($L, $L, $L)", inputName, col, row);
