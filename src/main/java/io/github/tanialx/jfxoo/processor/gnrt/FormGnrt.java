@@ -57,8 +57,8 @@ public class FormGnrt {
             String nameInMethod = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
             return Field.builder()
                     .name(fieldName)
-                    .getter(String.format("set%s", nameInMethod))
-                    .setter(String.format("get%s", nameInMethod))
+                    .setter(String.format("set%s", nameInMethod))
+                    .getter(String.format("get%s", nameInMethod))
                     .inputControlName("in_" + fieldName)
                     .type(ve.asType())
                     .build();

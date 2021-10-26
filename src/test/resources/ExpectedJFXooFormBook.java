@@ -17,7 +17,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
     private GridPane grid;
     private TextField in_title;
     private TextField in_author;
-    private DatePicker in_published;
+    private DatePicker in_publishedDate;
     private TextField in_price;
 
     public JFXooFormBook() {
@@ -44,10 +44,10 @@ public class JFXooFormBook implements JFXooForm<Book> {
         grid.add(label_author, 0, 1);
         grid.add(in_author, 1, 1);
 
-        Label label_published = new Label("Published");
-        in_published = new DatePicker();
-        grid.add(label_published, 0, 2);
-        grid.add(in_published, 1, 2);
+        Label label_publishedDate = new Label("Published Date");
+        in_publishedDate = new DatePicker();
+        grid.add(label_publishedDate, 0, 2);
+        grid.add(in_publishedDate, 1, 2);
 
         Label label_price = new Label("Price");
         in_price = new TextField();
@@ -59,7 +59,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
     public void init(Book book) {
         in_title.setText(book.getTitle());
         in_author.setText(book.getAuthor());
-        in_published.setValue(book.getPublished());
+        in_publishedDate.setValue(book.getPublishedDate());
         in_price.setText(book.getPrice().toString());
     }
 
@@ -68,7 +68,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         Book t = new Book();
         t.setTitle(in_title.getText());
         t.setAuthor(in_author.getText());
-        t.setPublished(in_published.getValue());
+        t.setPublishedDate(in_publishedDate.getValue());
         t.setPrice(new BigDecimal(in_price.getText()));
         return t;
     }

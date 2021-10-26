@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class Book {
     private String title;
     private String author;
-    private LocalDate published;
+    private LocalDate publishedDate;
     private BigDecimal price;
 
     public String getTitle() {
@@ -28,12 +28,12 @@ public class Book {
         this.author = author;
     }
 
-    public LocalDate getPublished() {
-        return published;
+    public LocalDate getPublishedDate() {
+        return publishedDate;
     }
 
-    public void setPublished(LocalDate published) {
-        this.published = published;
+    public void setPublishedDate(LocalDate publishedDate) {
+        this.publishedDate = publishedDate;
     }
 
     public BigDecimal getPrice() {
