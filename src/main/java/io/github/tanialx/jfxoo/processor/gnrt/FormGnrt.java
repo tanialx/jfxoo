@@ -2,11 +2,13 @@ package io.github.tanialx.jfxoo.processor.gnrt;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooForm;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -14,6 +16,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.github.tanialx.jfxoo.processor.gnrt.Helper.labelFormat;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -28,15 +31,42 @@ public class FormGnrt {
     private final ClassName POS = ClassName.get("javafx.geometry", "Pos");
     private final ClassName GRIDPANE = ClassName.get("javafx.scene.layout", "GridPane");
     private final ClassName NODE = ClassName.get("javafx.scene", "Node");
+    private List<Field> fs;
+
+    @AllArgsConstructor
+    @Getter
+    @Setter
+    public static class Field {
+        private String name;
+        private TypeMirror type;
+        private String nameInForm;
+        private String getter;
+        private String setter;
+    }
 
     public FormGnrt(ProcessingEnvironment procEnv) {
         this.types = procEnv.getTypeUtils();
         this.elements = procEnv.getElementUtils();
     }
 
+    private List<Field> fields(TypeElement te) {
+        return ElementFilter.fieldsIn(te.getEnclosedElements()).stream().map(ve -> {
+            String fieldName = ve.getSimpleName().toString();
+            String nameInForm = "in_" + fieldName;
+            String nameInMethod = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
+            String setter = String.format("set%s", nameInMethod);
+            String getter = String.format("get%s", nameInMethod);
+            return new Field(fieldName, ve.asType(), nameInForm, getter, setter);
+        }).collect(Collectors.toList());
+    }
+
     public JavaFile run(TypeElement te) {
         final String pkg = elements.getPackageOf(te).toString();
         final String _class = "JFXooForm" + te.getSimpleName();
+
+        // collect all props that should be displayed as fields on generated form
+        fs = fields(te);
+
         return JavaFile.builder(
                 pkg,
                 TypeSpec.classBuilder(_class)
@@ -44,10 +74,10 @@ public class FormGnrt {
                         .addSuperinterface(ParameterizedTypeName.get(
                                 ClassName.get(JFXooForm.class),
                                 TypeName.get(te.asType())))
-                        .addFields(props(te))
+                        .addFields(props())
                         .addMethod(JFXooForm_get())
                         .addMethod(constructor())
-                        .addMethod(layout(te))
+                        .addMethod(layout())
                         .addMethod(JFXooForm_init(te))
                         .addMethod(JFXooForm_value(te))
                         .build())
@@ -63,11 +93,9 @@ public class FormGnrt {
         mb.returns(type);
         final String OBJ_VAR = "t";
         mb.addStatement("$T $L = new $T()", type, OBJ_VAR, type);
-        List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
-        for (VariableElement f : fs) {
-            String fieldName = f.getSimpleName().toString();
-            String inputName = "in_" + fieldName;
-            String setter = String.format("set%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
+        for (Field f : fs) {
+            String inputName = f.getNameInForm();
+            String setter = f.getSetter();
             // TODO: handle different data types
             if (sameType(f, String.class)) {
                 mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, inputName);
@@ -92,10 +120,9 @@ public class FormGnrt {
         String paramName = te.getSimpleName().toString().toLowerCase();
         mb.addParameter(ParameterSpec.builder(paramType, paramName).build());
 
-        List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
-        for (VariableElement f : fs) {
-            String fieldName = f.getSimpleName().toString();
-            String inputName = "in_" + fieldName;
+        for (Field f : fs) {
+            String fieldName = f.getName();
+            String inputName = f.getNameInForm();
             String getter = String.format("get%s%s", Character.toUpperCase(fieldName.charAt(0)), fieldName.substring(1));
             // TODO: handle different data types
             if (sameType(f, String.class)) {
@@ -107,7 +134,7 @@ public class FormGnrt {
         return mb.build();
     }
 
-    private List<FieldSpec> props(TypeElement te) {
+    private List<FieldSpec> props() {
         // TODO: ui controls for simple data types
         // String   -> TextField
         // Number   -> TextField
@@ -116,11 +143,8 @@ public class FormGnrt {
         // Date     -> Date Picker (?)
         List<FieldSpec> fss = new ArrayList<>();
         fss.add(FieldSpec.builder(GRIDPANE, "grid", PRIVATE).build());
-        List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
-        for (VariableElement f : fs) {
-            String fieldName = f.getSimpleName().toString();
-            String inputName = "in_" + fieldName;
-            fss.add(FieldSpec.builder(TEXTFIELD, inputName, PRIVATE).build());
+        for (Field f : fs) {
+            fss.add(FieldSpec.builder(TEXTFIELD, f.getNameInForm(), PRIVATE).build());
         }
         return fss;
     }
@@ -134,19 +158,17 @@ public class FormGnrt {
         return mb.build();
     }
 
-    private MethodSpec layout(TypeElement te) {
+    private MethodSpec layout() {
         // TODO: Form controls (Save, Cancel buttons)
         MethodSpec.Builder mb = MethodSpec.methodBuilder("_layout");
         mb.addModifiers(PRIVATE);
         int row = 0;
         int col = 0;
-        List<VariableElement> fs = ElementFilter.fieldsIn(te.getEnclosedElements());
 
-        for (VariableElement f : fs) {
-            String fieldName = f.getSimpleName().toString();
-            String labelName = "label_" + fieldName;
-            String inputName = "in_" + fieldName;
-            mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(fieldName));
+        for (Field f : fs) {
+            String labelName = "label_" + f.getName();
+            String inputName = f.getNameInForm();
+            mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(f.getName()));
             mb.addStatement("$L = new $T()", inputName, TEXTFIELD);
             mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
             col++;
@@ -168,7 +190,7 @@ public class FormGnrt {
         return mb.build();
     }
 
-    public boolean sameType(Element e, Class<?> c) {
-        return types.isSameType(e.asType(), elements.getTypeElement(c.getCanonicalName()).asType());
+    public boolean sameType(Field f, Class<?> c) {
+        return types.isSameType(f.getType(), elements.getTypeElement(c.getCanonicalName()).asType());
     }
 }
