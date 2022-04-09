@@ -1,14 +1,14 @@
 package io.github.tanialx.jfxoo.test;
 
 import io.github.tanialx.jfxoo.JFXooForm;
-
 import java.lang.Override;
 import java.math.BigDecimal;
-
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Font;
@@ -22,6 +22,8 @@ public class JFXooFormBook implements JFXooForm<Book> {
     private TextField in_author;
     private DatePicker in_publishedDate;
     private TextField in_price;
+    private TextArea in_summary;
+    private CheckBox in_isInPublicDomain;
 
     public JFXooFormBook() {
         grid = new GridPane();
@@ -38,7 +40,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
 
     private void _layout() {
         Text heading = new Text("Book");
-        heading.setFont(Font.font("Tahoma", FontWeight.NORMAL, 20));
+        heading.setFont(Font.font(null, FontWeight.NORMAL, 20));
         grid.add(heading, 0, 0, 2, 1);
 
         Label label_title = new Label("Title");
@@ -60,6 +62,16 @@ public class JFXooFormBook implements JFXooForm<Book> {
         in_price = new TextField();
         grid.add(label_price, 0, 4);
         grid.add(in_price, 1, 4);
+
+        Label label_summary = new Label("Summary");
+        in_summary = new TextArea();
+        grid.add(label_summary, 0, 5);
+        grid.add(in_summary, 1, 5);
+
+        Label label_isInPublicDomain = new Label("Is In Public Domain");
+        in_isInPublicDomain = new CheckBox();
+        grid.add(label_isInPublicDomain, 0, 6);
+        grid.add(in_isInPublicDomain, 1, 6);
     }
 
     @Override
@@ -68,6 +80,8 @@ public class JFXooFormBook implements JFXooForm<Book> {
         in_author.setText(book.getAuthor());
         in_publishedDate.setValue(book.getPublishedDate());
         in_price.setText(book.getPrice().toString());
+        in_summary.setText(book.getSummary());
+        in_isInPublicDomain.setSelected(book.getIsInPublicDomain());
     }
 
     @Override
@@ -77,6 +91,8 @@ public class JFXooFormBook implements JFXooForm<Book> {
         t.setAuthor(in_author.getText());
         t.setPublishedDate(in_publishedDate.getValue());
         t.setPrice(new BigDecimal(in_price.getText()));
+        t.setSummary(in_summary.getText());
+        t.setIsInPublicDomain(in_isInPublicDomain.isSelected());
         return t;
     }
 }

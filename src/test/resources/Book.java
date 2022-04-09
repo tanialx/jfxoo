@@ -1,6 +1,8 @@
 package io.github.tanialx.jfxoo.test;
 
 import io.github.tanialx.jfxoo.annotation.JFXooForm;
+import io.github.tanialx.jfxoo.annotation.JFXooVar;
+import io.github.tanialx.jfxoo.annotation.JFXooVarType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -11,6 +13,9 @@ public class Book {
     private String author;
     private LocalDate publishedDate;
     private BigDecimal price;
+    @JFXooVar(type = JFXooVarType.textarea)
+    private String summary;
+    private Boolean isInPublicDomain;
 
     public String getTitle() {
         return title;
@@ -42,5 +47,21 @@ public class Book {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public String getSummary() {
+        return summary;
+    }
+
+    public void setSummary(String summary) {
+        this.summary = summary;
+    }
+
+    public Boolean getIsInPublicDomain() {
+        return isInPublicDomain;
+    }
+
+    public void setIsInPublicDomain(Boolean inPublicDomain) {
+        isInPublicDomain = inPublicDomain;
     }
 }
