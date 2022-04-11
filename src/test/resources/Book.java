@@ -1,6 +1,7 @@
 package io.github.tanialx.jfxoo.test;
 
 import io.github.tanialx.jfxoo.annotation.JFXooForm;
+import io.github.tanialx.jfxoo.annotation.JFXooTable;
 import io.github.tanialx.jfxoo.annotation.JFXooVar;
 import io.github.tanialx.jfxoo.annotation.JFXooVarType;
 
@@ -8,6 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @JFXooForm
+@JFXooTable
 public class Book {
     private String title;
     private String author;

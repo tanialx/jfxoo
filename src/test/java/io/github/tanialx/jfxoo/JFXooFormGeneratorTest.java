@@ -37,5 +37,10 @@ public class JFXooFormGeneratorTest {
                 "io.github.tanialx.jfxoo.test",
                         "JFXooFormBook.java")
                 .hasSourceEquivalentTo(fromResource("ExpectedJFXooFormBook.java"));
+        assertThat(compilation)
+                .generatedFile(SOURCE_OUTPUT,
+                        "io.github.tanialx.jfxoo.test",
+                        "JFXooTableBook.java")
+                .hasSourceEquivalentTo(fromResource("ExpectedJFXooTableBook.java"));
     }
 }
