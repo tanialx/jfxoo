@@ -30,12 +30,12 @@ public class CreatorGnrt {
         final String pkg = "io.github.tanialx.jfxoo";
         final String _class = "JFXooCreatorImpl";
         return JavaFile.builder(
-                pkg,
-                TypeSpec.classBuilder(_class)
-                        .addModifiers(PUBLIC)
-                        .addSuperinterface(JFXooCreator.class)
-                        .addMethod(_create())
-                        .build())
+                        pkg,
+                        TypeSpec.classBuilder(_class)
+                                .addModifiers(PUBLIC)
+                                .addSuperinterface(JFXooCreator.class)
+                                .addMethod(_create())
+                                .build())
                 .indent("    ")
                 .build();
     }

@@ -3,13 +3,6 @@ package io.github.tanialx.jfxoo.processor.gnrt;
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooForm;
 import io.github.tanialx.jfxoo.annotation.JFXooVar;
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,6 +25,19 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 
 public class FormGnrt {
 
+    private final ClassName LABEL = ClassName.get("javafx.scene.control", "Label");
+    private final ClassName TEXT_FIELD = ClassName.get("javafx.scene.control", "TextField");
+    private final ClassName POS = ClassName.get("javafx.geometry", "Pos");
+    private final ClassName GRID_PANE = ClassName.get("javafx.scene.layout", "GridPane");
+    private final ClassName NODE = ClassName.get("javafx.scene", "Node");
+    private final ClassName DATE_PICKER = ClassName.get("javafx.scene.control", "DatePicker");
+    private final ClassName PASSWORD_FIELD = ClassName.get("javafx.scene.control", "PasswordField");
+    private final ClassName TEXT = ClassName.get("javafx.scene.text", "Text");
+    private final ClassName FONT = ClassName.get("javafx.scene.text", "Font");
+    private final ClassName FONT_WEIGHT = ClassName.get("javafx.scene.text", "FontWeight");
+    private final ClassName TEXTAREA = ClassName.get("javafx.scene.control", "TextArea");
+    private final ClassName CHECKBOX = ClassName.get("javafx.scene.control", "CheckBox");
+
     private final Types types;
     private final Elements elements;
     private List<Field> fs;
@@ -45,7 +51,7 @@ public class FormGnrt {
         private String inputControlName;
         private String getter;
         private String setter;
-        private Class<?> control;
+        private ClassName control;
     }
 
     public FormGnrt(ProcessingEnvironment procEnv) {
@@ -66,23 +72,23 @@ public class FormGnrt {
             // Boolean  -> Checkbox
             // Date     -> Date Picker (?)
             JFXooVar jfXooVar = ve.getAnnotation(JFXooVar.class);
-            Class<?> control = null;
+            ClassName control = null;
             if (jfXooVar != null) {
                 switch (jfXooVar.type()) {
-                    case password -> control = PasswordField.class;
-                    case textarea -> control = TextArea.class;
+                    case password -> control = PASSWORD_FIELD;
+                    case textarea -> control = TEXTAREA;
                 }
             }
             if (control == null) {
                 TypeMirror t = ve.asType();
                 if (sameType(t, LocalDate.class)) {
-                    control = DatePicker.class;
+                    control = DATE_PICKER;
                 } else if (sameType(t, BigDecimal.class)) {
-                    control = TextField.class;
+                    control = TEXT_FIELD;
                 } else if (sameType(t, Boolean.class)) {
-                    control = CheckBox.class;
+                    control = CHECKBOX;
                 } else {
-                    control = TextField.class;
+                    control = TEXT_FIELD;
                 }
             }
             return Field.builder()
@@ -133,7 +139,7 @@ public class FormGnrt {
             String inputName = f.getInputControlName();
             String setter = f.getSetter();
             // TODO: handle different data types
-            if (f.control == TextField.class || f.control == TextArea.class) {
+            if (f.control == TEXT_FIELD || f.control == TEXTAREA || f.control == PASSWORD_FIELD) {
                 if (sameType(f, String.class)) {
                     mb.addStatement("$L.$L($L.getText())", OBJ_VAR, setter, inputName);
                 } else if (sameType(f, BigDecimal.class)) {
@@ -141,9 +147,9 @@ public class FormGnrt {
                 } else if (sameType(f, Integer.class)) {
                     mb.addStatement("$L.$L($T.parseInt($L.getText()))", OBJ_VAR, setter, Integer.class, inputName);
                 }
-            } else if (f.control == DatePicker.class) {
+            } else if (f.control == DATE_PICKER) {
                 mb.addStatement("$L.$L($L.getValue())", OBJ_VAR, setter, inputName);
-            } else if (f.control == CheckBox.class) {
+            } else if (f.control == CHECKBOX) {
                 mb.addStatement("$L.$L($L.isSelected())", OBJ_VAR, setter, inputName);
             }
         }
@@ -164,15 +170,15 @@ public class FormGnrt {
             String inputName = f.getInputControlName();
             String getter = f.getGetter();
             // TODO: handle different data types
-            if (f.control == DatePicker.class) {
+            if (f.control == DATE_PICKER) {
                 mb.addStatement("$L.setValue($L.$L())", inputName, paramName, getter);
-            } else if (f.control == TextField.class || f.control == TextArea.class) {
+            } else if (f.control == TEXT_FIELD || f.control == TEXTAREA || f.control == PASSWORD_FIELD) {
                 if (sameType(f.type, String.class)) {
                     mb.addStatement("$L.setText($L.$L())", inputName, paramName, getter);
                 } else {
                     mb.addStatement("$L.setText($L.$L().toString())", inputName, paramName, getter);
                 }
-            } else if (f.control == CheckBox.class) {
+            } else if (f.control == CHECKBOX) {
                 mb.addStatement("$L.setSelected($L.$L())", inputName, paramName, getter);
             }
         }
@@ -181,7 +187,7 @@ public class FormGnrt {
 
     private List<FieldSpec> props() {
         List<FieldSpec> fss = new ArrayList<>();
-        fss.add(FieldSpec.builder(GridPane.class, "grid", PRIVATE).build());
+        fss.add(FieldSpec.builder(GRID_PANE, "grid", PRIVATE).build());
         fs.forEach(f -> fss.add(FieldSpec.builder(f.control, f.inputControlName, PRIVATE).build()));
         return fss;
     }
@@ -189,7 +195,7 @@ public class FormGnrt {
     private MethodSpec JFXooForm_get() {
         MethodSpec.Builder mb = MethodSpec.methodBuilder("node");
         mb.addAnnotation(Override.class);
-        mb.returns(Node.class);
+        mb.returns(NODE);
         mb.addModifiers(PUBLIC);
         mb.addStatement("return grid");
         return mb.build();
@@ -200,8 +206,8 @@ public class FormGnrt {
         MethodSpec.Builder mb = MethodSpec.methodBuilder("_layout");
         mb.addModifiers(PRIVATE);
 
-        mb.addStatement("$T $L = new $T($S)", Text.class, "heading", Text.class, te.getSimpleName().toString());
-        mb.addStatement("$L.setFont($T.font($L,$T.$L,$L))", "heading", Font.class, "null", FontWeight.class, "NORMAL", 20);
+        mb.addStatement("$T $L = new $T($S)", TEXT, "heading", TEXT, te.getSimpleName().toString());
+        mb.addStatement("$L.setFont($T.font($L,$T.$L,$L))", "heading", FONT, "null", FONT_WEIGHT, "NORMAL", 20);
         mb.addStatement("grid.add($L, 0, 0, 2, 1)", "heading");
 
         int row = 1;
@@ -209,17 +215,17 @@ public class FormGnrt {
         for (Field f : fs) {
             String labelName = "label_" + f.getName();
             String inputName = f.getInputControlName();
-            mb.addStatement("$T $L = new $T($S)", Label.class, labelName, Label.class, labelFormat(f.getName()));
-            if (f.control == DatePicker.class) {
-                mb.addStatement("$L = new $T()", inputName, DatePicker.class);
-            } else if (f.control == PasswordField.class) {
-                mb.addStatement("$L = new $T()", inputName, PasswordField.class);
-            } else if (f.control == TextArea.class) {
-                mb.addStatement("$L = new $T()", inputName, TextArea.class);
-            } else if (f.control == CheckBox.class) {
-                mb.addStatement("$L = new $T()", inputName, CheckBox.class);
+            mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(f.getName()));
+            if (f.control == DATE_PICKER) {
+                mb.addStatement("$L = new $T()", inputName, DATE_PICKER);
+            } else if (f.control == PASSWORD_FIELD) {
+                mb.addStatement("$L = new $T()", inputName, PASSWORD_FIELD);
+            } else if (f.control == TEXTAREA) {
+                mb.addStatement("$L = new $T()", inputName, TEXTAREA);
+            } else if (f.control == CHECKBOX) {
+                mb.addStatement("$L = new $T()", inputName, CHECKBOX);
             } else {
-                mb.addStatement("$L = new $T()", inputName, TextField.class);
+                mb.addStatement("$L = new $T()", inputName, TEXT_FIELD);
             }
             mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
             col++;
@@ -233,8 +239,8 @@ public class FormGnrt {
     private MethodSpec constructor() {
         MethodSpec.Builder mb = MethodSpec.constructorBuilder();
         mb.addModifiers(PUBLIC);
-        mb.addStatement("grid = new $T()", GridPane.class);
-        mb.addStatement("grid.setAlignment($T.CENTER)", Pos.class);
+        mb.addStatement("grid = new $T()", GRID_PANE);
+        mb.addStatement("grid.setAlignment($T.CENTER)", POS);
         mb.addStatement("grid.setHgap($L)", 10);
         mb.addStatement("grid.setVgap($L)", 10);
         mb.addStatement("_layout()");
