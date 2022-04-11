@@ -93,7 +93,7 @@ public class CreatorGnrt {
         mb.addParameter(ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Class.class), TYPE_VAR), "T").build());
         mb.addStatement("$T table = null", TYPE);
         mb.beginControlFlow("switch(name)");
-        forms.forEach(te -> {
+        table.forEach(te -> {
             ClassName generatedClass = ClassName.get(elements.getPackageOf(te).toString(),
                     "JFXooTable" + te.getSimpleName().toString());
             mb.addStatement("case $S -> table = ($T) new $T()", te.getSimpleName().toString(),
