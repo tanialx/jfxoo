@@ -9,7 +9,6 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -25,6 +24,7 @@ public class CreatorGnrt {
         table = new ArrayList<>();
         this.procEnv = procEnv;
     }
+
     public boolean pending() {
         return !forms.isEmpty() || !table.isEmpty();
     }
@@ -32,6 +32,7 @@ public class CreatorGnrt {
     public void form(TypeElement te) {
         forms.add(te);
     }
+
     public void table(TypeElement te) {
         table.add(te);
     }

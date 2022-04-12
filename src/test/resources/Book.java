@@ -7,6 +7,7 @@ import io.github.tanialx.jfxoo.annotation.JFXooVarType;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 @JFXooForm
 @JFXooTable
@@ -18,6 +19,7 @@ public class Book {
     @JFXooVar(type = JFXooVarType.textarea)
     private String summary;
     private Boolean isInPublicDomain;
+    private List<Review> reviews;
 
     public String getTitle() {
         return title;
@@ -66,4 +68,8 @@ public class Book {
     public void setIsInPublicDomain(Boolean inPublicDomain) {
         isInPublicDomain = inPublicDomain;
     }
+
+    public List<Review> getReviews() { return reviews; }
+
+    public void setReviews(List<Review> reviews) { this.setReviews(reviews); }
 }

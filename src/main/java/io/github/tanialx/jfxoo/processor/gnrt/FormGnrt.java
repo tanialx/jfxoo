@@ -16,27 +16,18 @@ import javax.lang.model.util.Types;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import static io.github.tanialx.jfxoo.processor.gnrt.Helper.labelFormat;
+import static com.squareup.javapoet.TypeName.VOID;
+import static io.github.tanialx.jfxoo.processor.CLSName.*;
+import static io.github.tanialx.jfxoo.processor.gnrt.Helper.*;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 public class FormGnrt {
-
-    private final ClassName LABEL = ClassName.get("javafx.scene.control", "Label");
-    private final ClassName TEXT_FIELD = ClassName.get("javafx.scene.control", "TextField");
-    private final ClassName POS = ClassName.get("javafx.geometry", "Pos");
-    private final ClassName GRID_PANE = ClassName.get("javafx.scene.layout", "GridPane");
-    private final ClassName NODE = ClassName.get("javafx.scene", "Node");
-    private final ClassName DATE_PICKER = ClassName.get("javafx.scene.control", "DatePicker");
-    private final ClassName PASSWORD_FIELD = ClassName.get("javafx.scene.control", "PasswordField");
-    private final ClassName TEXT = ClassName.get("javafx.scene.text", "Text");
-    private final ClassName FONT = ClassName.get("javafx.scene.text", "Font");
-    private final ClassName FONT_WEIGHT = ClassName.get("javafx.scene.text", "FontWeight");
-    private final ClassName TEXTAREA = ClassName.get("javafx.scene.control", "TextArea");
-    private final ClassName CHECKBOX = ClassName.get("javafx.scene.control", "CheckBox");
 
     private final Types types;
     private final Elements elements;
@@ -48,6 +39,7 @@ public class FormGnrt {
     public static class Field {
         private String name;
         private TypeMirror type;
+        private String pkg;
         private String inputControlName;
         private String getter;
         private String setter;
@@ -87,18 +79,13 @@ public class FormGnrt {
                     control = TEXT_FIELD;
                 } else if (sameType(t, Boolean.class)) {
                     control = CHECKBOX;
+                } else if (isFromType(TypeName.get(t), ClassName.get(List.class))) {
+                    control = JFXOO_TABLE;
                 } else {
                     control = TEXT_FIELD;
                 }
             }
-            return Field.builder()
-                    .name(fieldName)
-                    .setter(setter)
-                    .getter(String.format("get%s", nameInMethod))
-                    .inputControlName(inputName)
-                    .type(ve.asType())
-                    .control(control)
-                    .build();
+            return Field.builder().name(fieldName).setter(setter).getter(String.format("get%s", nameInMethod)).inputControlName(inputName).type(ve.asType()).control(control).pkg(elements.getPackageOf(ve).toString()).build();
         }).collect(Collectors.toList());
     }
 
@@ -109,22 +96,39 @@ public class FormGnrt {
         // collect all props that should be displayed as fields on generated form
         fs = fields(te);
 
-        return JavaFile.builder(
-                        pkg,
+        return JavaFile.builder(pkg,
                         TypeSpec.classBuilder(_class)
-                                .addModifiers(PUBLIC)
-                                .addSuperinterface(ParameterizedTypeName.get(
-                                        ClassName.get(JFXooForm.class),
-                                        TypeName.get(te.asType())))
-                                .addFields(props())
-                                .addMethod(JFXooForm_get())
-                                .addMethod(constructor())
-                                .addMethod(layout(te))
-                                .addMethod(JFXooForm_init(te))
-                                .addMethod(JFXooForm_value(te))
+                                .addModifiers(PUBLIC).
+                                addSuperinterface(ParameterizedTypeName.get(ClassName.get(JFXooForm.class), TypeName.get(te.asType())))
+                                .addFields(props(te))
+                                .addMethods(Arrays.asList(constructor(),
+                                        setOnSave(te), setOnCancel(), JFXooForm_get(),
+                                        layout(te), JFXooForm_init(te), JFXooForm_value(te)
+                                ))
                                 .build())
                 .indent("    ")
                 .build();
+    }
+
+    private MethodSpec setOnCancel() {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("setOnCancel");
+        mb.addAnnotation(Override.class);
+        mb.addParameter(ParameterizedTypeName.get(ClassName.get(Consumer.class), ClassName.get("java.lang", "Void")), "onCancel");
+        mb.returns(VOID);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("this.onCancel = onCancel");
+        return mb.build();
+    }
+
+
+    private MethodSpec setOnSave(TypeElement te) {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("setOnSave");
+        mb.addAnnotation(Override.class);
+        mb.addParameter(ParameterizedTypeName.get(ClassName.get(Consumer.class), TypeName.get(te.asType())), "onSave");
+        mb.returns(VOID);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("this.onSave = onSave");
+        return mb.build();
     }
 
     private MethodSpec JFXooForm_value(TypeElement te) {
@@ -151,6 +155,8 @@ public class FormGnrt {
                 mb.addStatement("$L.$L($L.getValue())", OBJ_VAR, setter, inputName);
             } else if (f.control == CHECKBOX) {
                 mb.addStatement("$L.$L($L.isSelected())", OBJ_VAR, setter, inputName);
+            } else if (f.control == JFXOO_TABLE) {
+                mb.addStatement("$L.$L($L.getItems())", OBJ_VAR, setter, inputName);
             }
         }
         mb.addStatement("return $L", OBJ_VAR);
@@ -180,15 +186,26 @@ public class FormGnrt {
                 }
             } else if (f.control == CHECKBOX) {
                 mb.addStatement("$L.setSelected($L.$L())", inputName, paramName, getter);
+            } else if (f.control == JFXOO_TABLE) {
+                mb.addStatement("$L.getItems().setAll($L.$L())", inputName, paramName, getter);
             }
         }
         return mb.build();
     }
 
-    private List<FieldSpec> props() {
+    private List<FieldSpec> props(TypeElement te) {
         List<FieldSpec> fss = new ArrayList<>();
         fss.add(FieldSpec.builder(GRID_PANE, "grid", PRIVATE).build());
-        fs.forEach(f -> fss.add(FieldSpec.builder(f.control, f.inputControlName, PRIVATE).build()));
+        fs.forEach(f -> {
+            if (f.control == JFXOO_TABLE) {
+                TypeName _type = typeArgs(TypeName.get(f.type)).get(0);
+                fss.add(FieldSpec.builder(ParameterizedTypeName.get(TABLEVIEW, _type), f.inputControlName, PRIVATE).build());
+            } else {
+                fss.add(FieldSpec.builder(f.control, f.inputControlName, PRIVATE).build());
+            }
+        });
+        fss.add(FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), TypeName.get(te.asType())), "onSave", PRIVATE).build());
+        fss.add(FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), ClassName.get(Void.class)), "onCancel", PRIVATE).build());
         return fss;
     }
 
@@ -216,23 +233,46 @@ public class FormGnrt {
             String labelName = "label_" + f.getName();
             String inputName = f.getInputControlName();
             mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(f.getName()));
-            if (f.control == DATE_PICKER) {
-                mb.addStatement("$L = new $T()", inputName, DATE_PICKER);
-            } else if (f.control == PASSWORD_FIELD) {
-                mb.addStatement("$L = new $T()", inputName, PASSWORD_FIELD);
-            } else if (f.control == TEXTAREA) {
-                mb.addStatement("$L = new $T()", inputName, TEXTAREA);
-            } else if (f.control == CHECKBOX) {
-                mb.addStatement("$L = new $T()", inputName, CHECKBOX);
+            if (f.control == JFXOO_TABLE) {
+                String jfxooTableVar = String.format("jfxooTable_%s", f.name);
+                TypeName _type = typeArgs(TypeName.get(f.type)).get(0);
+                String simpleName = _type.toString().substring(_type.toString().lastIndexOf(".") + 1);
+                ClassName jfxooTableClassname = ClassName.get(f.pkg, "JFXooTable" + simpleName);
+                mb.addStatement("$T $L = new $T()", jfxooTableClassname, jfxooTableVar, jfxooTableClassname);
+                mb.addStatement("$L = $L.table()", inputName, jfxooTableVar);
+                mb.addStatement("grid.add($L, $L, $L, 2, 1)", labelName, col, row++);
+                mb.addStatement("grid.add($L.control(), $L, $L, 2, 1)", jfxooTableVar, col, row++);
+                mb.addStatement("grid.add($L, $L, $L, 2, 1)", inputName, col, row++);
             } else {
-                mb.addStatement("$L = new $T()", inputName, TEXT_FIELD);
+                if (f.control == DATE_PICKER) {
+                    mb.addStatement("$L = new $T()", inputName, DATE_PICKER);
+                } else if (f.control == PASSWORD_FIELD) {
+                    mb.addStatement("$L = new $T()", inputName, PASSWORD_FIELD);
+                } else if (f.control == TEXTAREA) {
+                    mb.addStatement("$T.setValignment($L, $T.TOP)", GRID_PANE, labelName, VPOS);
+                    mb.addStatement("$L = new $T()", inputName, TEXTAREA);
+                } else if (f.control == CHECKBOX) {
+                    mb.addStatement("$L = new $T()", inputName, CHECKBOX);
+                } else {
+                    mb.addStatement("$L = new $T()", inputName, TEXT_FIELD);
+                }
+                mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
+                col++;
+                mb.addStatement("grid.add($L, $L, $L)", inputName, col, row);
+                row++;
             }
-            mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
-            col++;
-            mb.addStatement("grid.add($L, $L, $L)", inputName, col, row);
-            row++;
             col = 0;
         }
+
+        mb.addStatement("$T btn_save = new $T($S)", BUTTON, BUTTON, "Save");
+        mb.addStatement("btn_save.setOnMouseClicked(evt -> { if (onSave != null) onSave.accept(value()); })");
+        mb.addStatement("$T btn_cancel = new $T($S)", BUTTON, BUTTON, "Cancel");
+        mb.addStatement("btn_cancel.setOnMouseClicked(evt -> { if (onCancel != null) onCancel.accept(null); })");
+        mb.addStatement("$T hBox_control = new $T()", HBOX, HBOX);
+        mb.addStatement("hBox_control.setSpacing($L)", 4);
+        mb.addStatement("hBox_control.setAlignment($T.BASELINE_RIGHT)", POS);
+        mb.addStatement("hBox_control.getChildren().addAll(btn_cancel, btn_save)");
+        mb.addStatement("grid.add(hBox_control, 0, $L, 2, 1)", row);
         return mb.build();
     }
 
@@ -243,6 +283,7 @@ public class FormGnrt {
         mb.addStatement("grid.setAlignment($T.CENTER)", POS);
         mb.addStatement("grid.setHgap($L)", 10);
         mb.addStatement("grid.setVgap($L)", 10);
+        mb.addStatement("grid.setPadding(new $T(20, 20, 20, 20))", INSETS);
         mb.addStatement("_layout()");
         return mb.build();
     }
