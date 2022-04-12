@@ -107,7 +107,8 @@ public class TableGnrt {
                 .add("f.init(selected);\n")
                 .add("f.setOnSave(_f -> {\n")
                 .add("int idx = table.getItems().indexOf(selected);\n")
-                .add("table.getItems().set(idx, _f);\n")
+                .add("table.getItems().remove(selected);\n")
+                .add("table.getItems().add(idx, _f);\n")
                 .add("s.close();\n")
                 .add("});\n")
                 .add("f.setOnCancel(Void -> s.close());\n")
@@ -124,6 +125,7 @@ public class TableGnrt {
         mb.addStatement("control = new $T()", HBOX);
         mb.addStatement("control.setSpacing($L)", 4);
         mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
+        mb.addStatement("$T btnEDT = new $T($S)", BUTTON, BUTTON, "Edit");
         mb.addStatement("$T btnREM = new $T($S)", BUTTON, BUTTON, "Remove");
         mb.addStatement(CodeBlock.builder()
                 .add("btnADD.setOnMouseClicked(evt -> {\n")
@@ -141,14 +143,34 @@ public class TableGnrt {
                 .add("})")
                 .build());
         mb.addStatement(CodeBlock.builder()
-                        .add("btnREM.setOnMouseClicked(evt -> {\n")
+                .add("btnEDT.setOnMouseClicked(evt -> {\n")
+                .add("$T selected = table.getSelectionModel().getSelectedItem();\n", te.asType())
+                .add("if (selected == null) return;\n")
+                .add("$T s = new $T();\n", STAGE, STAGE)
+                .add("$T f = new $T();\n", jfxooFormClassname, jfxooFormClassname)
+                .add("f.init(selected);\n")
+                .add("f.setOnSave(_f -> {\n")
+                .add("int idx = table.getItems().indexOf(selected);\n")
+                .add("table.getItems().remove(selected);\n")
+                .add("table.getItems().add(idx, _f);\n")
+                .add("s.close();\n")
+                .add("});\n")
+                .add("f.setOnCancel(Void -> s.close());\n")
+                .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
+                .add("s.setScene(scene);\n")
+                .add("s.setTitle(\"Edit\");\n")
+                .add("s.show();\n")
+                .add("})")
+                .build());
+        mb.addStatement(CodeBlock.builder()
+                .add("btnREM.setOnMouseClicked(evt -> {\n")
                 .add("$T selected = table.getSelectionModel().getSelectedItem();\n", te.asType())
                 .add("if (selected != null) {\n")
                 .add("table.getItems().remove(selected);\n")
                 .add("}\n")
-                .add(" })")
+                .add("})")
                 .build());
-        mb.addStatement("control.getChildren().addAll(btnADD, btnREM)");
+        mb.addStatement("control.getChildren().addAll(btnADD, btnEDT, btnREM)");
         mb.addModifiers(PUBLIC);
         return mb.build();
     }

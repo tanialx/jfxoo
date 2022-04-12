@@ -58,7 +58,8 @@ public class JFXooTableBook implements JFXooTable<Book> {
                     f.init(selected);
                     f.setOnSave(_f -> {
                         int idx = table.getItems().indexOf(selected);
-                        table.getItems().set(idx, _f);
+                        table.getItems().remove(selected);
+                        table.getItems().add(idx, _f);
                         s.close();
                     });
                     f.setOnCancel(Void -> s.close());
@@ -73,6 +74,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
         control = new HBox();
         control.setSpacing(4);
         Button btnADD = new Button("Add");
+        Button btnEDT = new Button("Edit");
         Button btnREM = new Button("Remove");
         btnADD.setOnMouseClicked(evt -> {
             Stage s = new Stage();
@@ -87,13 +89,31 @@ public class JFXooTableBook implements JFXooTable<Book> {
             s.setTitle("Add");
             s.show();
         });
+        btnEDT.setOnMouseClicked(evt -> {
+            Book selected = table.getSelectionModel().getSelectedItem();
+            if (selected == null) return;
+            Stage s = new Stage();
+            JFXooFormBook f = new JFXooFormBook();
+            f.init(selected);
+            f.setOnSave(_f -> {
+                int idx = table.getItems().indexOf(selected);
+                table.getItems().remove(selected);
+                table.getItems().add(idx, _f);
+                s.close();
+            });
+            f.setOnCancel(Void -> s.close());
+            Scene scene = new Scene((GridPane) f.node());
+            s.setScene(scene);
+            s.setTitle("Edit");
+            s.show();
+        });
         btnREM.setOnMouseClicked(evt -> {
             Book selected = table.getSelectionModel().getSelectedItem();
             if (selected != null) {
                 table.getItems().remove(selected);
             }
         });
-        control.getChildren().addAll(btnADD, btnREM);
+        control.getChildren().addAll(btnADD, btnEDT, btnREM);
     }
 
     @Override
