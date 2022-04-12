@@ -93,7 +93,29 @@ public class TableGnrt {
         mb.addStatement("table.setColumnResizePolicy($T.$L)", TABLEVIEW, "CONSTRAINED_RESIZE_POLICY");
         mb.addStatement("table.setEditable(false)");
         mb.addStatement("control = new $T()", HBOX);
+        mb.addStatement("control.setSpacing($L)", 4);
         mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
+
+        String simpleName = te.getSimpleName().toString();
+        ClassName jfxooFormClassname = ClassName.get(elements.getPackageOf(te).toString(), "JFXooForm" + simpleName);
+
+        mb.addStatement(CodeBlock.builder()
+                .add("btnADD.setOnMouseClicked(evt -> {\n")
+                .add("$T s = new $T();\n", STAGE, STAGE)
+                .add("$T f = new $T();\n", jfxooFormClassname, jfxooFormClassname)
+                .add("f.setOnSave(_f -> {\n" +
+                        "                table.getItems().add(_f);\n" +
+                        "                s.close();\n" +
+                        "            });\n")
+                .add(" f.setOnCancel(Void -> {\n" +
+                        "                s.close();\n" +
+                        "            });\n")
+                .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
+                .add("s.setScene(scene);\n")
+                .add("s.setTitle($S);\n", "Add")
+                .add("s.show();\n")
+                .add("})")
+                .build());
         mb.addStatement("control.getChildren().add(btnADD)");
         mb.addModifiers(PUBLIC);
         return mb.build();

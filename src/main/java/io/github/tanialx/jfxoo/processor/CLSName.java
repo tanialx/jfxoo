@@ -4,9 +4,13 @@ import com.squareup.javapoet.ClassName;
 import io.github.tanialx.jfxoo.JFXooTable;
 
 public class CLSName {
+    public static final ClassName STAGE = ClassName.get("javafx.stage", "Stage");
+    public static final ClassName SCENE = ClassName.get("javafx.scene", "Scene");
     public static final ClassName LABEL = ClassName.get("javafx.scene.control", "Label");
     public static final ClassName TEXT_FIELD = ClassName.get("javafx.scene.control", "TextField");
     public static final ClassName POS = ClassName.get("javafx.geometry", "Pos");
+    public static final ClassName VPOS = ClassName.get("javafx.geometry", "VPos");
+    public static final ClassName INSETS = ClassName.get("javafx.geometry", "Insets");
     public static final ClassName GRID_PANE = ClassName.get("javafx.scene.layout", "GridPane");
     public static final ClassName NODE = ClassName.get("javafx.scene", "Node");
     public static final ClassName DATE_PICKER = ClassName.get("javafx.scene.control", "DatePicker");

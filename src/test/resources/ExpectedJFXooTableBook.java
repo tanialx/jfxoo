@@ -9,10 +9,13 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.stage.Stage;
 
 public class JFXooTableBook implements JFXooTable<Book> {
 
@@ -45,7 +48,23 @@ public class JFXooTableBook implements JFXooTable<Book> {
         table.setEditable(false);
 
         control = new HBox();
+        control.setSpacing(4);
         Button btnADD = new Button("Add");
+        btnADD.setOnMouseClicked(evt -> {
+            Stage s = new Stage();
+            JFXooFormBook f = new JFXooFormBook();
+            f.setOnSave(_f -> {
+                table.getItems().add(_f);
+                s.close();
+            });
+            f.setOnCancel(Void -> {
+                s.close();
+            });
+            Scene scene = new Scene((GridPane) f.node());
+            s.setScene(scene);
+            s.setTitle("Add");
+            s.show();
+        });
         control.getChildren().add(btnADD);
     }
 

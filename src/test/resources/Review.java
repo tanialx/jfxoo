@@ -4,6 +4,7 @@ import io.github.tanialx.jfxoo.annotation.JFXooForm;
 import io.github.tanialx.jfxoo.annotation.JFXooTable;
 
 @JFXooTable
+@JFXooForm
 public class Review {
     private Integer score;
     private String comment;
