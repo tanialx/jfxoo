@@ -5,12 +5,15 @@ import java.lang.Override;
 import java.math.BigDecimal;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -24,6 +27,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
     private TextField in_price;
     private TextArea in_summary;
     private CheckBox in_isInPublicDomain;
+    private TableView<Review> in_reviews;
 
     public JFXooFormBook() {
         grid = new GridPane();
@@ -72,6 +76,18 @@ public class JFXooFormBook implements JFXooForm<Book> {
         in_isInPublicDomain = new CheckBox();
         grid.add(label_isInPublicDomain, 0, 6);
         grid.add(in_isInPublicDomain, 1, 6);
+
+        Label label_reviews = new Label("Reviews");
+        in_reviews = new JFXooTableReview().table();
+        grid.add(label_reviews, 0, 7);
+        grid.add(in_reviews, 1, 7);
+
+        Button btn_save = new Button("Save");
+        Button btn_cancel = new Button("Cancel");
+        HBox hBox_control = new HBox();
+        hBox_control.setAlignment(Pos.BASELINE_RIGHT);
+        hBox_control.getChildren().addAll(btn_cancel, btn_save);
+        grid.add(hBox_control, 0, 8, 2, 1);
     }
 
     @Override

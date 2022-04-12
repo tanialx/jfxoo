@@ -9,11 +9,14 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.HBox;
 
 public class JFXooTableBook implements JFXooTable<Book> {
 
+    private HBox control;
     private TableView<Book> table;
 
     public JFXooTableBook() {
@@ -40,11 +43,20 @@ public class JFXooTableBook implements JFXooTable<Book> {
         table.getColumns().addAll(Arrays.asList(c_title, c_author, c_publishedDate, c_price, c_summary, c_isInPublicDomain));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setEditable(false);
+
+        control = new HBox();
+        Button btnADD = new Button("Add");
+        control.getChildren().add(btnADD);
     }
 
     @Override
     public TableView<Book> table() {
         return table;
+    }
+
+    @Override
+    public HBox control() {
+        return control;
     }
 
     @Override

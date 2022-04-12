@@ -2,7 +2,6 @@ package io.github.tanialx.jfxoo.processor.gnrt;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooTable;
-import javafx.scene.control.TableView;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -13,13 +12,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static io.github.tanialx.jfxoo.processor.CLSName.*;
+import static io.github.tanialx.jfxoo.processor.gnrt.Helper.isFromType;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
 public class TableGnrt {
-    private final ClassName TABLEVIEW = ClassName.get("javafx.scene.control", "TableView");
-    private final ClassName TABLE_COLUMN = ClassName.get("javafx.scene.control", "TableColumn");
-    private final ClassName SIMPLE_OBJECT_PROPERTY = ClassName.get("javafx.beans.property", "SimpleObjectProperty");
 
     private Types types;
     private Elements elements;
@@ -40,13 +38,24 @@ public class TableGnrt {
                                 .addSuperinterface(ParameterizedTypeName.get(
                                         ClassName.get(JFXooTable.class),
                                         TypeName.get(te.asType())))
+                                .addField(HBOX, "control", PRIVATE)
                                 .addField(ParameterizedTypeName.get(TABLEVIEW, TypeName.get(te.asType())), "table", PRIVATE)
                                 .addMethod(constructor(te))
                                 .addMethod(table(te))
+                                .addMethod(control())
                                 .addMethod(data(te))
                                 .build())
                 .indent("    ")
                 .build();
+    }
+
+    private MethodSpec control() {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("control");
+        mb.addAnnotation(Override.class);
+        mb.returns(HBOX);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("return control");
+        return mb.build();
     }
 
     private MethodSpec table(TypeElement te) {
@@ -72,6 +81,7 @@ public class TableGnrt {
         mb.addStatement("table = new $T<>()", TABLEVIEW);
         List<String> cols = new ArrayList<>();
         ElementFilter.fieldsIn(te.getEnclosedElements()).forEach(v -> {
+            if (isFromType(TypeName.get(v.asType()), ClassName.get(List.class))) return;
             String name = v.getSimpleName().toString();
             String colVar = String.format("c_%s", v.getSimpleName().toString());
             String getter = String.format("get%s", Character.toUpperCase(name.charAt(0)) + name.substring(1));
@@ -82,6 +92,9 @@ public class TableGnrt {
         mb.addStatement("table.getColumns().addAll($T.asList($L))", Arrays.class, String.join(",", cols));
         mb.addStatement("table.setColumnResizePolicy($T.$L)", TABLEVIEW, "CONSTRAINED_RESIZE_POLICY");
         mb.addStatement("table.setEditable(false)");
+        mb.addStatement("control = new $T()", HBOX);
+        mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
+        mb.addStatement("control.getChildren().add(btnADD)");
         mb.addModifiers(PUBLIC);
         return mb.build();
     }

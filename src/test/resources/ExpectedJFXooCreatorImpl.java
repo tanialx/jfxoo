@@ -2,6 +2,7 @@ package io.github.tanialx.jfxoo;
 
 import io.github.tanialx.jfxoo.test.JFXooFormBook;
 import io.github.tanialx.jfxoo.test.JFXooTableBook;
+import io.github.tanialx.jfxoo.test.JFXooTableReview;
 import java.lang.Class;
 import java.lang.Override;
 import java.lang.String;
@@ -23,6 +24,7 @@ public class JFXooCreatorImpl implements JFXooCreator {
         JFXooTable<T> table = null;
         switch(name){
             case "Book" -> table = (JFXooTable<T>) new JFXooTableBook();
+            case "Review" -> table = (JFXooTable<T>) new JFXooTableReview();
             default -> table = null;
         }
         return table;

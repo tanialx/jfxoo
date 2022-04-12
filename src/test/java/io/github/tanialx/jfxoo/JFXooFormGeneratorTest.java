@@ -3,9 +3,13 @@ package io.github.tanialx.jfxoo;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import io.github.tanialx.jfxoo.processor.JFXooProc;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.util.Objects;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -22,7 +26,7 @@ public class JFXooFormGeneratorTest {
     @Test
     public void sourcesGenerated() {
         Compilation compilation = javac().withProcessors(new JFXooProc())
-                .compile(fromResource("Book.java"));
+                .compile(fromResource("Book.java"), fromResource("Review.java"));
 
         // Each source file is successfully compiled
         assertThat(compilation).succeeded();
