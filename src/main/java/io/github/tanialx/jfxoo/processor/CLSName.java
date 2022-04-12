@@ -24,6 +24,9 @@ public class CLSName {
     public static final ClassName HBOX = ClassName.get("javafx.scene.layout", "HBox");
     public static final ClassName TABLEVIEW = ClassName.get("javafx.scene.control", "TableView");
     public static final ClassName TABLE_COLUMN = ClassName.get("javafx.scene.control", "TableColumn");
+    public static final ClassName TABLE_ROW = ClassName.get("javafx.scene.control", "TableRow");
     public static final ClassName SIMPLE_OBJECT_PROPERTY = ClassName.get("javafx.beans.property", "SimpleObjectProperty");
+    public static final ClassName MOUSE_BUTTON = ClassName.get("javafx.scene.input", "MouseButton");
+
     public static final ClassName JFXOO_TABLE = ClassName.get(JFXooTable.class);
 }

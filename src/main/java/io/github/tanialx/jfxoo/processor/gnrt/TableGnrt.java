@@ -92,12 +92,37 @@ public class TableGnrt {
         mb.addStatement("table.getColumns().addAll($T.asList($L))", Arrays.class, String.join(",", cols));
         mb.addStatement("table.setColumnResizePolicy($T.$L)", TABLEVIEW, "CONSTRAINED_RESIZE_POLICY");
         mb.addStatement("table.setEditable(false)");
-        mb.addStatement("control = new $T()", HBOX);
-        mb.addStatement("control.setSpacing($L)", 4);
-        mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
 
         String simpleName = te.getSimpleName().toString();
         ClassName jfxooFormClassname = ClassName.get(elements.getPackageOf(te).toString(), "JFXooForm" + simpleName);
+
+        mb.addStatement(CodeBlock.builder()
+                .add("table.setRowFactory(tv -> {\n")
+                .add("$T<$T> row = new $T<>();\n", TABLE_ROW, te.asType(), TABLE_ROW)
+                .add("row.setOnMouseClicked(evt -> {\n")
+                .add("if (!row.isEmpty() && evt.getButton() == $T.PRIMARY && evt.getClickCount() == 2) {\n", MOUSE_BUTTON)
+                .add("$T selected = row.getItem();\n", te.asType())
+                .add("$T s = new $T();\n", STAGE, STAGE)
+                .add("$T f = new $T();\n", jfxooFormClassname, jfxooFormClassname)
+                .add("f.init(selected);\n")
+                .add("f.setOnSave(_f -> {\n")
+                .add("int idx = table.getItems().indexOf(selected);\n")
+                .add("table.getItems().set(idx, _f);\n")
+                .add("s.close();\n")
+                .add("});\n")
+                .add("f.setOnCancel(Void -> s.close());\n")
+                .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
+                .add("s.setScene(scene);\n")
+                .add("s.setTitle(\"Edit\");\n")
+                .add("s.show();\n")
+                .add("}\n});\n")
+                .add("return row;\n")
+                .add("})")
+                .build());
+
+        mb.addStatement("control = new $T()", HBOX);
+        mb.addStatement("control.setSpacing($L)", 4);
+        mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
 
         mb.addStatement(CodeBlock.builder()
                 .add("btnADD.setOnMouseClicked(evt -> {\n")
@@ -107,9 +132,7 @@ public class TableGnrt {
                         "                table.getItems().add(_f);\n" +
                         "                s.close();\n" +
                         "            });\n")
-                .add(" f.setOnCancel(Void -> {\n" +
-                        "                s.close();\n" +
-                        "            });\n")
+                .add(" f.setOnCancel(Void -> s.close());\n")
                 .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle($S);\n", "Add")

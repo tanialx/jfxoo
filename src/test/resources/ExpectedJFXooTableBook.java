@@ -12,7 +12,9 @@ import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
@@ -46,7 +48,28 @@ public class JFXooTableBook implements JFXooTable<Book> {
         table.getColumns().addAll(Arrays.asList(c_title, c_author, c_publishedDate, c_price, c_summary, c_isInPublicDomain));
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         table.setEditable(false);
-
+        table.setRowFactory(tv -> {
+            TableRow<Book> row = new TableRow<>();
+            row.setOnMouseClicked(evt -> {
+                if (!row.isEmpty() && evt.getButton() == MouseButton.PRIMARY && evt.getClickCount() == 2) {
+                    Book selected = row.getItem();
+                    Stage s = new Stage();
+                    JFXooFormBook f = new JFXooFormBook();
+                    f.init(selected);
+                    f.setOnSave(_f -> {
+                        int idx = table.getItems().indexOf(selected);
+                        table.getItems().set(idx, _f);
+                        s.close();
+                    });
+                    f.setOnCancel(Void -> s.close());
+                    Scene scene = new Scene((GridPane) f.node());
+                    s.setScene(scene);
+                    s.setTitle("Edit");
+                    s.show();
+                }
+            });
+            return row ;
+        });
         control = new HBox();
         control.setSpacing(4);
         Button btnADD = new Button("Add");
@@ -57,9 +80,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
                 table.getItems().add(_f);
                 s.close();
             });
-            f.setOnCancel(Void -> {
-                s.close();
-            });
+            f.setOnCancel(Void -> s.close());
             Scene scene = new Scene((GridPane) f.node());
             s.setScene(scene);
             s.setTitle("Add");
