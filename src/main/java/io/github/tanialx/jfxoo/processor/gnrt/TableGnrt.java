@@ -115,7 +115,8 @@ public class TableGnrt {
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle(\"Edit\");\n")
                 .add("s.show();\n")
-                .add("}\n});\n")
+                .add("}\n")
+                .add("});\n")
                 .add("return row;\n")
                 .add("})")
                 .build());
@@ -123,7 +124,7 @@ public class TableGnrt {
         mb.addStatement("control = new $T()", HBOX);
         mb.addStatement("control.setSpacing($L)", 4);
         mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
-
+        mb.addStatement("$T btnREM = new $T($S)", BUTTON, BUTTON, "Remove");
         mb.addStatement(CodeBlock.builder()
                 .add("btnADD.setOnMouseClicked(evt -> {\n")
                 .add("$T s = new $T();\n", STAGE, STAGE)
@@ -139,7 +140,15 @@ public class TableGnrt {
                 .add("s.show();\n")
                 .add("})")
                 .build());
-        mb.addStatement("control.getChildren().add(btnADD)");
+        mb.addStatement(CodeBlock.builder()
+                        .add("btnREM.setOnMouseClicked(evt -> {\n")
+                .add("$T selected = table.getSelectionModel().getSelectedItem();\n", te.asType())
+                .add("if (selected != null) {\n")
+                .add("table.getItems().remove(selected);\n")
+                .add("}\n")
+                .add(" })")
+                .build());
+        mb.addStatement("control.getChildren().addAll(btnADD, btnREM)");
         mb.addModifiers(PUBLIC);
         return mb.build();
     }

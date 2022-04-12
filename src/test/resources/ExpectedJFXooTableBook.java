@@ -73,6 +73,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
         control = new HBox();
         control.setSpacing(4);
         Button btnADD = new Button("Add");
+        Button btnREM = new Button("Remove");
         btnADD.setOnMouseClicked(evt -> {
             Stage s = new Stage();
             JFXooFormBook f = new JFXooFormBook();
@@ -86,7 +87,13 @@ public class JFXooTableBook implements JFXooTable<Book> {
             s.setTitle("Add");
             s.show();
         });
-        control.getChildren().add(btnADD);
+        btnREM.setOnMouseClicked(evt -> {
+            Book selected = table.getSelectionModel().getSelectedItem();
+            if (selected != null) {
+                table.getItems().remove(selected);
+            }
+        });
+        control.getChildren().addAll(btnADD, btnREM);
     }
 
     @Override
