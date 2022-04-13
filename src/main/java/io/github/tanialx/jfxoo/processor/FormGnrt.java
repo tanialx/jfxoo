@@ -2,6 +2,7 @@ package io.github.tanialx.jfxoo.processor;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooForm;
+import io.github.tanialx.jfxoo.JFXooFormSnackBar;
 import io.github.tanialx.jfxoo.annotation.JFXooVar;
 import lombok.*;
 
@@ -146,11 +147,32 @@ public class FormGnrt {
                                 .addFields(props(te))
                                 .addMethods(Arrays.asList(constructor(),
                                         setOnSave(te), setOnCancel(), JFXooForm_get(),
-                                        layout(te), JFXooForm_init(te), JFXooForm_value(te)
+                                        layout(te), JFXooForm_init(te), JFXooForm_value(te),
+                                        snackBarInfo(), snackBarError()
                                 ))
                                 .build())
                 .indent("    ")
                 .build();
+    }
+
+    private MethodSpec snackBarError() {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("error");
+        mb.addAnnotation(Override.class);
+        mb.addParameter(String.class, "msg");
+        mb.returns(VOID);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("snackBar.item(true, msg)");
+        return mb.build();
+    }
+
+    private MethodSpec snackBarInfo() {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("info");
+        mb.addAnnotation(Override.class);
+        mb.addParameter(String.class, "msg");
+        mb.returns(VOID);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("snackBar.item(false, msg)");
+        return mb.build();
     }
 
     private MethodSpec setOnCancel() {
@@ -239,7 +261,7 @@ public class FormGnrt {
     private List<FieldSpec> props(TypeElement te) {
         List<FieldSpec> fss = new ArrayList<>();
         fss.add(FieldSpec.builder(VBOX, "node", PRIVATE).build());
-        //fss.add(FieldSpec.builder(GRID_PANE, "grid", PRIVATE).build());
+        fss.add(FieldSpec.builder(JFXooFormSnackBar.class, "snackBar", PRIVATE).build());
         fs.forEach(f -> {
             if (f.control == JFXOO_TABLE) {
                 TypeName _type = typeArgs(TypeName.get(f.type)).get(0);
@@ -323,7 +345,7 @@ public class FormGnrt {
         mb.addStatement("$T sp = new $T(grid)", SCROLL_PANE, SCROLL_PANE);
         mb.addStatement("sp.setFitToWidth(true)");
         mb.addStatement("$T.setVgrow(sp, $T.ALWAYS)", VBOX, PRIORITY);
-        mb.addStatement("node.getChildren().addAll(sp, hBox_control)");
+        mb.addStatement("node.getChildren().addAll(snackBar.node(), sp, hBox_control)");
         return mb.build();
     }
 
@@ -331,6 +353,7 @@ public class FormGnrt {
         MethodSpec.Builder mb = MethodSpec.constructorBuilder();
         mb.addModifiers(PUBLIC);
         mb.addStatement("node = new $T()", VBOX);
+        mb.addStatement("snackBar = new $T()", JFXooFormSnackBar.class);
         mb.addStatement("_layout()");
         return mb.build();
     }

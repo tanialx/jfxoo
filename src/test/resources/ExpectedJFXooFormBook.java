@@ -1,7 +1,9 @@
 package io.github.tanialx.jfxoo.test;
 
 import io.github.tanialx.jfxoo.JFXooForm;
+import io.github.tanialx.jfxoo.JFXooFormSnackBar;
 import java.lang.Override;
+import java.lang.String;
 import java.lang.Void;
 import java.math.BigDecimal;
 import java.util.function.Consumer;
@@ -27,6 +29,7 @@ import javafx.scene.text.Text;
 public class JFXooFormBook implements JFXooForm<Book> {
 
     private VBox node;
+    private JFXooFormSnackBar snackBar;
     private TextField in_title;
     private TextField in_author;
     private DatePicker in_publishedDate;
@@ -39,6 +42,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
 
     public JFXooFormBook() {
         node = new VBox();
+        snackBar = new JFXooFormSnackBar();
         _layout();
     }
 
@@ -128,7 +132,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         ScrollPane sp = new ScrollPane(grid);
         sp.setFitToWidth(true);
         VBox.setVgrow(sp, Priority.ALWAYS);
-        node.getChildren().addAll(sp, hBox_control);
+        node.getChildren().addAll(snackBar.node(), sp, hBox_control);
     }
 
     @Override
@@ -153,5 +157,15 @@ public class JFXooFormBook implements JFXooForm<Book> {
         t.setIsInPublicDomain(in_isInPublicDomain.isSelected());
         t.setReviews(in_reviews.getItems());
         return t;
+    }
+
+    @Override
+    public void info(String msg) {
+        snackBar.item(false, msg);
+    }
+
+    @Override
+    public void error(String msg) {
+        snackBar.item(true, msg);
     }
 }

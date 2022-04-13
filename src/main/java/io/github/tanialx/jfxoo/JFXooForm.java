@@ -15,4 +15,8 @@ public interface JFXooForm<T> {
     void setOnSave(Consumer<T> onSave);
 
     void setOnCancel(Consumer<Void> onCancel);
+
+    void info(String msg);
+
+    void error(String msg);
 }
