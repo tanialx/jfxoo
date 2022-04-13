@@ -1,4 +1,4 @@
-package io.github.tanialx.jfxoo.processor.gnrt;
+package io.github.tanialx.jfxoo.processor;
 
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;

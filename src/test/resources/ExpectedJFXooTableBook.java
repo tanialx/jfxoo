@@ -15,7 +15,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -67,7 +66,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
                         s.close();
                     });
                     f.setOnCancel(Void -> s.close());
-                    Scene scene = new Scene((GridPane) f.node());
+                    Scene scene = new Scene(f.node());
                     s.setScene(scene);
                     s.setTitle("Edit");
                     s.show();
@@ -88,7 +87,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
                 s.close();
             });
             f.setOnCancel(Void -> s.close());
-            Scene scene = new Scene((GridPane) f.node());
+            Scene scene = new Scene(f.node());
             s.setScene(scene);
             s.setTitle("Add");
             s.show();
@@ -106,7 +105,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
                 s.close();
             });
             f.setOnCancel(Void -> s.close());
-            Scene scene = new Scene((GridPane) f.node());
+            Scene scene = new Scene(f.node());
             s.setScene(scene);
             s.setTitle("Edit");
             s.show();

@@ -12,7 +12,9 @@ public class CLSName {
     public static final ClassName VPOS = ClassName.get("javafx.geometry", "VPos");
     public static final ClassName INSETS = ClassName.get("javafx.geometry", "Insets");
     public static final ClassName GRID_PANE = ClassName.get("javafx.scene.layout", "GridPane");
+    public static final ClassName PRIORITY = ClassName.get("javafx.scene.layout", "Priority");
     public static final ClassName NODE = ClassName.get("javafx.scene", "Node");
+    public static final ClassName SCROLL_PANE = ClassName.get("javafx.scene.control", "ScrollPane");
     public static final ClassName DATE_PICKER = ClassName.get("javafx.scene.control", "DatePicker");
     public static final ClassName PASSWORD_FIELD = ClassName.get("javafx.scene.control", "PasswordField");
     public static final ClassName TEXT = ClassName.get("javafx.scene.text", "Text");

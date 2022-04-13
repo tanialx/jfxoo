@@ -1,11 +1,9 @@
-package io.github.tanialx.jfxoo.processor.gnrt;
+package io.github.tanialx.jfxoo.processor;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooForm;
 import io.github.tanialx.jfxoo.annotation.JFXooVar;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -18,12 +16,13 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeName.VOID;
 import static io.github.tanialx.jfxoo.processor.CLSName.*;
-import static io.github.tanialx.jfxoo.processor.gnrt.Helper.*;
+import static io.github.tanialx.jfxoo.processor.Helper.*;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -44,6 +43,17 @@ public class FormGnrt {
         private String getter;
         private String setter;
         private ClassName control;
+        private Position pLabel;
+        private Position pInput;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    private static class Position {
+        public int row;
+        public int col;
+        public int rowspan;
+        public int colspan;
     }
 
     public FormGnrt(ProcessingEnvironment procEnv) {
@@ -52,11 +62,16 @@ public class FormGnrt {
     }
 
     private List<Field> fields(TypeElement te) {
+        // first row (0) is preserved for heading
+        // start with 1
+        AtomicInteger row = new AtomicInteger(1);
+
         return ElementFilter.fieldsIn(te.getEnclosedElements()).stream().map(ve -> {
             String fieldName = ve.getSimpleName().toString();
             String nameInMethod = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
             String setter = String.format("set%s", nameInMethod);
             String inputName = "in_" + fieldName;
+
             // TODO: ui controls for simple data types
             // String   -> TextField
             // Number   -> TextField
@@ -85,7 +100,35 @@ public class FormGnrt {
                     control = TEXT_FIELD;
                 }
             }
-            return Field.builder().name(fieldName).setter(setter).getter(String.format("get%s", nameInMethod)).inputControlName(inputName).type(ve.asType()).control(control).pkg(elements.getPackageOf(ve).toString()).build();
+
+            Position pLabel = new Position();
+            Position pInput = new Position();
+            if (control == JFXOO_TABLE) {
+                pLabel.row = row.getAndIncrement();
+                pLabel.colspan = 2;
+                pInput.colspan = 2;
+                pInput.col = 0;
+            } else {
+                pLabel.row = row.get();
+                pLabel.colspan = 1;
+                pInput.col = 1;
+                pInput.colspan = 1;
+            }
+            pInput.row = row.getAndIncrement();
+            pLabel.col = 0;
+            pLabel.rowspan = 1;
+            pInput.rowspan = 1;
+
+            return Field.builder().name(fieldName)
+                    .setter(setter)
+                    .getter(String.format("get%s", nameInMethod))
+                    .inputControlName(inputName)
+                    .type(ve.asType())
+                    .control(control)
+                    .pkg(elements.getPackageOf(ve).toString())
+                    .pLabel(pLabel)
+                    .pInput(pInput)
+                    .build();
         }).collect(Collectors.toList());
     }
 
@@ -98,8 +141,8 @@ public class FormGnrt {
 
         return JavaFile.builder(pkg,
                         TypeSpec.classBuilder(_class)
-                                .addModifiers(PUBLIC).
-                                addSuperinterface(ParameterizedTypeName.get(ClassName.get(JFXooForm.class), TypeName.get(te.asType())))
+                                .addModifiers(PUBLIC)
+                                .addSuperinterface(ParameterizedTypeName.get(ClassName.get(JFXooForm.class), TypeName.get(te.asType())))
                                 .addFields(props(te))
                                 .addMethods(Arrays.asList(constructor(),
                                         setOnSave(te), setOnCancel(), JFXooForm_get(),
@@ -195,7 +238,8 @@ public class FormGnrt {
 
     private List<FieldSpec> props(TypeElement te) {
         List<FieldSpec> fss = new ArrayList<>();
-        fss.add(FieldSpec.builder(GRID_PANE, "grid", PRIVATE).build());
+        fss.add(FieldSpec.builder(VBOX, "node", PRIVATE).build());
+        //fss.add(FieldSpec.builder(GRID_PANE, "grid", PRIVATE).build());
         fs.forEach(f -> {
             if (f.control == JFXOO_TABLE) {
                 TypeName _type = typeArgs(TypeName.get(f.type)).get(0);
@@ -212,9 +256,9 @@ public class FormGnrt {
     private MethodSpec JFXooForm_get() {
         MethodSpec.Builder mb = MethodSpec.methodBuilder("node");
         mb.addAnnotation(Override.class);
-        mb.returns(NODE);
+        mb.returns(VBOX);
         mb.addModifiers(PUBLIC);
-        mb.addStatement("return grid");
+        mb.addStatement("return node");
         return mb.build();
     }
 
@@ -223,12 +267,16 @@ public class FormGnrt {
         MethodSpec.Builder mb = MethodSpec.methodBuilder("_layout");
         mb.addModifiers(PRIVATE);
 
+        mb.addStatement("$T grid = new $T()", GRID_PANE, GRID_PANE);
+        mb.addStatement("grid.setAlignment($T.CENTER)", POS);
+        mb.addStatement("grid.setHgap($L)", 10);
+        mb.addStatement("grid.setVgap($L)", 10);
+        mb.addStatement("grid.setPadding(new $T(20, 20, 20, 20))", INSETS);
+
         mb.addStatement("$T $L = new $T($S)", TEXT, "heading", TEXT, te.getSimpleName().toString());
         mb.addStatement("$L.setFont($T.font($L,$T.$L,$L))", "heading", FONT, "null", FONT_WEIGHT, "NORMAL", 20);
         mb.addStatement("grid.add($L, 0, 0, 2, 1)", "heading");
 
-        int row = 1;
-        int col = 0;
         for (Field f : fs) {
             String labelName = "label_" + f.getName();
             String inputName = f.getInputControlName();
@@ -240,8 +288,9 @@ public class FormGnrt {
                 ClassName jfxooTableClassname = ClassName.get(f.pkg, "JFXooTable" + simpleName);
                 mb.addStatement("$T $L = new $T()", jfxooTableClassname, jfxooTableVar, jfxooTableClassname);
                 mb.addStatement("$L = $L.table()", inputName, jfxooTableVar);
-                mb.addStatement("grid.add($L, $L, $L, 2, 1)", labelName, col, row++);
-                mb.addStatement("grid.add($L.node(), $L, $L, 2, 1)", jfxooTableVar, col, row++);
+                mb.addStatement("grid.add($L, $L, $L, $L, $L)", labelName, f.pLabel.col, f.pLabel.row, f.pLabel.colspan, f.pLabel.rowspan);
+                mb.addStatement("grid.add($L.node(), $L, $L, $L, $L)", jfxooTableVar, f.pInput.col, f.pInput.row, f.pInput.colspan, f.pInput.rowspan);
+                mb.addStatement("$T.setHgrow($L.node(), $T.ALWAYS)", GRID_PANE, jfxooTableVar, PRIORITY);
             } else {
                 if (f.control == DATE_PICKER) {
                     mb.addStatement("$L = new $T()", inputName, DATE_PICKER);
@@ -255,12 +304,10 @@ public class FormGnrt {
                 } else {
                     mb.addStatement("$L = new $T()", inputName, TEXT_FIELD);
                 }
-                mb.addStatement("grid.add($L, $L, $L)", labelName, col, row);
-                col++;
-                mb.addStatement("grid.add($L, $L, $L)", inputName, col, row);
-                row++;
+                mb.addStatement("grid.add($L, $L, $L, $L, $L)", labelName, f.pLabel.col, f.pLabel.row, f.pLabel.colspan, f.pLabel.rowspan);
+                mb.addStatement("grid.add($L, $L, $L, $L, $L)", inputName, f.pInput.col, f.pInput.row, f.pInput.colspan, f.pInput.rowspan);
+                mb.addStatement("$T.setHgrow($L, $T.ALWAYS)", GRID_PANE, inputName, PRIORITY);
             }
-            col = 0;
         }
 
         mb.addStatement("$T btn_save = new $T($S)", BUTTON, BUTTON, "Save");
@@ -269,20 +316,21 @@ public class FormGnrt {
         mb.addStatement("btn_cancel.setOnMouseClicked(evt -> { if (onCancel != null) onCancel.accept(null); })");
         mb.addStatement("$T hBox_control = new $T()", HBOX, HBOX);
         mb.addStatement("hBox_control.setSpacing($L)", 4);
+        mb.addStatement("hBox_control.setPadding(new $T($L, $L, $L, $L))", INSETS, 10, 10, 10, 10);
         mb.addStatement("hBox_control.setAlignment($T.BASELINE_RIGHT)", POS);
         mb.addStatement("hBox_control.getChildren().addAll(btn_cancel, btn_save)");
-        mb.addStatement("grid.add(hBox_control, 0, $L, 2, 1)", row);
+
+        mb.addStatement("$T sp = new $T(grid)", SCROLL_PANE, SCROLL_PANE);
+        mb.addStatement("sp.setFitToWidth(true)");
+        mb.addStatement("$T.setVgrow(sp, $T.ALWAYS)", VBOX, PRIORITY);
+        mb.addStatement("node.getChildren().addAll(sp, hBox_control)");
         return mb.build();
     }
 
     private MethodSpec constructor() {
         MethodSpec.Builder mb = MethodSpec.constructorBuilder();
         mb.addModifiers(PUBLIC);
-        mb.addStatement("grid = new $T()", GRID_PANE);
-        mb.addStatement("grid.setAlignment($T.CENTER)", POS);
-        mb.addStatement("grid.setHgap($L)", 10);
-        mb.addStatement("grid.setVgap($L)", 10);
-        mb.addStatement("grid.setPadding(new $T(20, 20, 20, 20))", INSETS);
+        mb.addStatement("node = new $T()", VBOX);
         mb.addStatement("_layout()");
         return mb.build();
     }

@@ -3,9 +3,6 @@ package io.github.tanialx.jfxoo.processor;
 import com.squareup.javapoet.JavaFile;
 import io.github.tanialx.jfxoo.annotation.JFXooForm;
 import io.github.tanialx.jfxoo.annotation.JFXooTable;
-import io.github.tanialx.jfxoo.processor.gnrt.CreatorGnrt;
-import io.github.tanialx.jfxoo.processor.gnrt.FormGnrt;
-import io.github.tanialx.jfxoo.processor.gnrt.TableGnrt;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;

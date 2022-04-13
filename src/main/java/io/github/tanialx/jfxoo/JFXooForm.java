@@ -1,12 +1,12 @@
 package io.github.tanialx.jfxoo;
 
-import javafx.scene.Node;
+import javafx.scene.layout.VBox;
 
 import java.util.function.Consumer;
 
 public interface JFXooForm<T> {
 
-    Node node();
+    VBox node();
 
     void init(T t);
 

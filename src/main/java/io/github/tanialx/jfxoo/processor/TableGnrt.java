@@ -1,4 +1,4 @@
-package io.github.tanialx.jfxoo.processor.gnrt;
+package io.github.tanialx.jfxoo.processor;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooTable;
@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static io.github.tanialx.jfxoo.processor.CLSName.*;
-import static io.github.tanialx.jfxoo.processor.gnrt.Helper.isFromType;
+import static io.github.tanialx.jfxoo.processor.Helper.isFromType;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
@@ -125,7 +125,7 @@ public class TableGnrt {
                 .add("s.close();\n")
                 .add("});\n")
                 .add("f.setOnCancel(Void -> s.close());\n")
-                .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
+                .add("$T scene = new $T(f.node());\n", SCENE, SCENE)
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle(\"Edit\");\n")
                 .add("s.show();\n")
@@ -149,7 +149,7 @@ public class TableGnrt {
                         "                s.close();\n" +
                         "            });\n")
                 .add(" f.setOnCancel(Void -> s.close());\n")
-                .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
+                .add("$T scene = new $T(f.node());\n", SCENE, SCENE)
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle($S);\n", "Add")
                 .add("s.show();\n")
@@ -169,7 +169,7 @@ public class TableGnrt {
                 .add("s.close();\n")
                 .add("});\n")
                 .add("f.setOnCancel(Void -> s.close());\n")
-                .add("$T scene = new $T(($T) f.node());\n", SCENE, SCENE, GRID_PANE)
+                .add("$T scene = new $T(f.node());\n", SCENE, SCENE)
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle(\"Edit\");\n")
                 .add("s.show();\n")

@@ -1,4 +1,4 @@
-package io.github.tanialx.jfxoo.processor.gnrt;
+package io.github.tanialx.jfxoo.processor;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooCreator;
