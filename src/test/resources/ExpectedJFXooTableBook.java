@@ -17,14 +17,18 @@ import javafx.scene.control.TableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 public class JFXooTableBook implements JFXooTable<Book> {
 
+    private VBox node;
     private HBox control;
     private TableView<Book> table;
 
     public JFXooTableBook() {
+        node = new VBox();
+        node.setSpacing(4);
         table = new TableView<>();
 
         TableColumn<Book, String> c_title = new TableColumn<>("Title");
@@ -114,6 +118,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
             }
         });
         control.getChildren().addAll(btnADD, btnEDT, btnREM);
+        node.getChildren().addAll(control, table);
     }
 
     @Override
@@ -129,5 +134,10 @@ public class JFXooTableBook implements JFXooTable<Book> {
     @Override
     public ObservableList<Book> data() {
         return table.getItems();
+    }
+
+    @Override
+    public VBox node() {
+        return node;
     }
 }

@@ -241,8 +241,7 @@ public class FormGnrt {
                 mb.addStatement("$T $L = new $T()", jfxooTableClassname, jfxooTableVar, jfxooTableClassname);
                 mb.addStatement("$L = $L.table()", inputName, jfxooTableVar);
                 mb.addStatement("grid.add($L, $L, $L, 2, 1)", labelName, col, row++);
-                mb.addStatement("grid.add($L.control(), $L, $L, 2, 1)", jfxooTableVar, col, row++);
-                mb.addStatement("grid.add($L, $L, $L, 2, 1)", inputName, col, row++);
+                mb.addStatement("grid.add($L.node(), $L, $L, 2, 1)", jfxooTableVar, col, row++);
             } else {
                 if (f.control == DATE_PICKER) {
                     mb.addStatement("$L = new $T()", inputName, DATE_PICKER);

@@ -99,8 +99,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         JFXooTableReview jfxooTable_reviews = new JFXooTableReview();
         in_reviews = jfxooTable_reviews.table();
         grid.add(label_reviews, 0, 7, 2, 1);
-        grid.add(jfxooTable_reviews.control(), 0, 8, 2, 1);
-        grid.add(in_reviews, 0, 9, 2, 1);
+        grid.add(jfxooTable_reviews.node(), 0, 8, 2, 1);
 
         Button btn_save = new Button("Save");
         btn_save.setOnMouseClicked(evt -> {
@@ -114,7 +113,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         hBox_control.setSpacing(4);
         hBox_control.setAlignment(Pos.BASELINE_RIGHT);
         hBox_control.getChildren().addAll(btn_cancel, btn_save);
-        grid.add(hBox_control, 0, 10, 2, 1);
+        grid.add(hBox_control, 0, 9, 2, 1);
     }
 
     @Override

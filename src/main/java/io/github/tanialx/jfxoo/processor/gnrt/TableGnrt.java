@@ -38,15 +38,26 @@ public class TableGnrt {
                                 .addSuperinterface(ParameterizedTypeName.get(
                                         ClassName.get(JFXooTable.class),
                                         TypeName.get(te.asType())))
+                                .addField(VBOX, "node", PRIVATE)
                                 .addField(HBOX, "control", PRIVATE)
                                 .addField(ParameterizedTypeName.get(TABLEVIEW, TypeName.get(te.asType())), "table", PRIVATE)
                                 .addMethod(constructor(te))
                                 .addMethod(table(te))
                                 .addMethod(control())
                                 .addMethod(data(te))
+                                .addMethod(node())
                                 .build())
                 .indent("    ")
                 .build();
+    }
+
+    public MethodSpec node() {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("node");
+        mb.addAnnotation(Override.class);
+        mb.returns(VBOX);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("return node");
+        return mb.build();
     }
 
     private MethodSpec control() {
@@ -78,6 +89,8 @@ public class TableGnrt {
 
     private MethodSpec constructor(TypeElement te) {
         MethodSpec.Builder mb = MethodSpec.constructorBuilder();
+        mb.addStatement("node = new $T()", VBOX);
+        mb.addStatement("node.setSpacing($L)", 4);
         mb.addStatement("table = new $T<>()", TABLEVIEW);
         List<String> cols = new ArrayList<>();
         ElementFilter.fieldsIn(te.getEnclosedElements()).forEach(v -> {
@@ -171,6 +184,7 @@ public class TableGnrt {
                 .add("})")
                 .build());
         mb.addStatement("control.getChildren().addAll(btnADD, btnEDT, btnREM)");
+        mb.addStatement("node.getChildren().addAll(control, table)");
         mb.addModifiers(PUBLIC);
         return mb.build();
     }

@@ -22,6 +22,7 @@ public class CLSName {
     public static final ClassName CHECKBOX = ClassName.get("javafx.scene.control", "CheckBox");
     public static final ClassName BUTTON = ClassName.get("javafx.scene.control", "Button");
     public static final ClassName HBOX = ClassName.get("javafx.scene.layout", "HBox");
+    public static final ClassName VBOX = ClassName.get("javafx.scene.layout", "VBox");
     public static final ClassName TABLEVIEW = ClassName.get("javafx.scene.control", "TableView");
     public static final ClassName TABLE_COLUMN = ClassName.get("javafx.scene.control", "TableColumn");
     public static final ClassName TABLE_ROW = ClassName.get("javafx.scene.control", "TableRow");
