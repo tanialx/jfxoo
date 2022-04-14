@@ -1,22 +1,23 @@
 package io.github.tanialx.jfxoo;
 
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class JFXooFormSnackBar {
 
-    private final VBox node;
+    private final VBox node = new VBox();
 
-    public VBox node() { return node; }
-
-    public JFXooFormSnackBar() {
-        node = new VBox();
+    public VBox node() {
+        return node;
     }
 
     public void item(boolean isErr, String text) {
@@ -24,7 +25,7 @@ public class JFXooFormSnackBar {
         snackBarItem.setMinHeight(50);
         snackBarItem.setBackground(new Background(
                 new BackgroundFill(
-                        Paint.valueOf( isErr ? "#d5aba3" : "#c3dac1"),
+                        Paint.valueOf(isErr ? "#d5aba3" : "#c3dac1"),
                         CornerRadii.EMPTY,
                         Insets.EMPTY
                 )
@@ -33,7 +34,6 @@ public class JFXooFormSnackBar {
         snackBarItem.setPadding(new Insets(10, 10, 10, 10));
 
         Text tf = new Text(text);
-        tf.setDisable(true);
         tf.setFill(Color.BLACK);
 
         Region reg = new Region();
@@ -41,12 +41,32 @@ public class JFXooFormSnackBar {
 
         snackBarItem.setAlignment(Pos.CENTER_LEFT);
 
-        Button close = new Button("\u2715");
-        close.setBackground(null);
+        Text close = new Text("\u2715");
+        tf.setFill(Color.BLACK);
         close.setFont(Font.font(null, 18));
         close.setOnMouseClicked(evt -> node.getChildren().remove(snackBarItem));
 
         snackBarItem.getChildren().addAll(tf, reg, close);
         node.getChildren().add(snackBarItem);
+
+        if (node.getChildren().size() > 1) {
+            Timer timer = new Timer();
+            HBox prev = (HBox) node.getChildren().get(0);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    if (prev.getOpacity() >= .4) {
+                        Platform.runLater(() -> {
+                            double o = prev.getOpacity();
+                            prev.setOpacity(o - .01);
+                            prev.getChildren().forEach( f -> f.setOpacity(o - .01));
+                        });
+                        return;
+                    }
+                    Platform.runLater(() -> node.getChildren().remove(prev));
+                    timer.cancel();
+                }
+            }, 1000, 5);
+        }
     }
 }
