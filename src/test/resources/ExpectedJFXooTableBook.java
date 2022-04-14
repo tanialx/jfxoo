@@ -59,20 +59,20 @@ public class JFXooTableBook implements JFXooTable<Book> {
                     Stage s = new Stage();
                     JFXooFormBook f = new JFXooFormBook();
                     f.init(selected);
-                    f.setOnSave(_f -> {
+                    f.button("Save", _f -> {
                         int idx = table.getItems().indexOf(selected);
                         table.getItems().remove(selected);
                         table.getItems().add(idx, _f);
                         s.close();
                     });
-                    f.setOnCancel(Void -> s.close());
+                    f.button("Cancel", _f -> s.close());
                     Scene scene = new Scene(f.node());
                     s.setScene(scene);
                     s.setTitle("Edit");
                     s.show();
                 }
             });
-            return row ;
+            return row;
         });
         control = new HBox();
         control.setSpacing(4);
@@ -82,11 +82,11 @@ public class JFXooTableBook implements JFXooTable<Book> {
         btnADD.setOnMouseClicked(evt -> {
             Stage s = new Stage();
             JFXooFormBook f = new JFXooFormBook();
-            f.setOnSave(_f -> {
+            f.button("Save", _f -> {
                 table.getItems().add(_f);
                 s.close();
             });
-            f.setOnCancel(Void -> s.close());
+            f.button("Cancel", _f -> s.close());
             Scene scene = new Scene(f.node());
             s.setScene(scene);
             s.setTitle("Add");
@@ -98,13 +98,13 @@ public class JFXooTableBook implements JFXooTable<Book> {
             Stage s = new Stage();
             JFXooFormBook f = new JFXooFormBook();
             f.init(selected);
-            f.setOnSave(_f -> {
+            f.button("Save", _f -> {
                 int idx = table.getItems().indexOf(selected);
                 table.getItems().remove(selected);
                 table.getItems().add(idx, _f);
                 s.close();
             });
-            f.setOnCancel(Void -> s.close());
+            f.button("Cancel", _f -> s.close());
             Scene scene = new Scene(f.node());
             s.setScene(scene);
             s.setTitle("Edit");

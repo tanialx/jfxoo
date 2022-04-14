@@ -4,7 +4,6 @@ import io.github.tanialx.jfxoo.JFXooForm;
 import io.github.tanialx.jfxoo.JFXooFormSnackBar;
 import java.lang.Override;
 import java.lang.String;
-import java.lang.Void;
 import java.math.BigDecimal;
 import java.util.function.Consumer;
 import javafx.geometry.Insets;
@@ -30,6 +29,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
 
     private VBox node;
     private JFXooFormSnackBar snackBar;
+    private HBox hBox_control;
     private TextField in_title;
     private TextField in_author;
     private DatePicker in_publishedDate;
@@ -37,8 +37,6 @@ public class JFXooFormBook implements JFXooForm<Book> {
     private TextArea in_summary;
     private CheckBox in_isInPublicDomain;
     private TableView<Review> in_reviews;
-    private Consumer<Book> onSave;
-    private Consumer<Void> onCancel;
 
     public JFXooFormBook() {
         node = new VBox();
@@ -47,12 +45,12 @@ public class JFXooFormBook implements JFXooForm<Book> {
     }
 
     @Override
-    public void setOnSave(Consumer<Book> onSave) {
-        this.onSave = onSave;
-    }
-    @Override
-    public void setOnCancel(Consumer<Void> onCancel) {
-        this.onCancel = onCancel;
+    public void button(String buttonText, Consumer<Book> onClicked) {
+        Button btn = new Button(buttonText);
+        if (onClicked != null) {
+            btn.setOnMouseClicked(evt -> onClicked.accept(value()));
+        }
+        hBox_control.getChildren().add(btn);
     }
 
     @Override
@@ -115,19 +113,10 @@ public class JFXooFormBook implements JFXooForm<Book> {
         grid.add(jfxooTable_reviews.node(), 0, 8, 2, 1);
         GridPane.setHgrow(jfxooTable_reviews.node(), Priority.ALWAYS);
 
-        Button btn_save = new Button("Save");
-        btn_save.setOnMouseClicked(evt -> {
-            if (onSave != null) onSave.accept(value());
-        });
-        Button btn_cancel = new Button("Cancel");
-        btn_cancel.setOnMouseClicked(evt -> {
-            if (onCancel != null) onCancel.accept(null);
-        });
-        HBox hBox_control = new HBox();
+        hBox_control = new HBox();
         hBox_control.setSpacing(4);
         hBox_control.setPadding(new Insets(10, 10, 10, 10));
         hBox_control.setAlignment(Pos.BASELINE_RIGHT);
-        hBox_control.getChildren().addAll(btn_cancel, btn_save);
 
         ScrollPane sp = new ScrollPane(grid);
         sp.setFitToWidth(true);

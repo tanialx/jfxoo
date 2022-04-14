@@ -12,9 +12,7 @@ public interface JFXooForm<T> {
 
     T value();
 
-    void setOnSave(Consumer<T> onSave);
-
-    void setOnCancel(Consumer<Void> onCancel);
+    void button(String buttonText, Consumer<T> onClicked);
 
     void info(String msg);
 

@@ -146,13 +146,28 @@ public class FormGnrt {
                                 .addSuperinterface(ParameterizedTypeName.get(ClassName.get(JFXooForm.class), TypeName.get(te.asType())))
                                 .addFields(props(te))
                                 .addMethods(Arrays.asList(constructor(),
-                                        setOnSave(te), setOnCancel(), JFXooForm_get(),
+                                        button(te), JFXooForm_get(),
                                         layout(te), JFXooForm_init(te), JFXooForm_value(te),
                                         snackBarInfo(), snackBarError()
                                 ))
                                 .build())
                 .indent("    ")
                 .build();
+    }
+
+    private MethodSpec button(TypeElement te) {
+        MethodSpec.Builder mb = MethodSpec.methodBuilder("button");
+        mb.addAnnotation(Override.class);
+        mb.addParameter(String.class, "buttonText");
+        mb.addParameter(ParameterizedTypeName.get(ClassName.get(Consumer.class), TypeName.get(te.asType())), "onClicked");
+        mb.returns(VOID);
+        mb.addModifiers(PUBLIC);
+        mb.addStatement("$T btn = new $T($L)", BUTTON, BUTTON, "buttonText");
+        mb.beginControlFlow("if (onClicked != null)");
+        mb.addStatement("btn.setOnMouseClicked(evt -> onClicked.accept(value()))");
+        mb.endControlFlow();
+        mb.addStatement("hBox_control.getChildren().add(btn)");
+        return mb.build();
     }
 
     private MethodSpec snackBarError() {
@@ -172,27 +187,6 @@ public class FormGnrt {
         mb.returns(VOID);
         mb.addModifiers(PUBLIC);
         mb.addStatement("snackBar.item(false, msg)");
-        return mb.build();
-    }
-
-    private MethodSpec setOnCancel() {
-        MethodSpec.Builder mb = MethodSpec.methodBuilder("setOnCancel");
-        mb.addAnnotation(Override.class);
-        mb.addParameter(ParameterizedTypeName.get(ClassName.get(Consumer.class), ClassName.get("java.lang", "Void")), "onCancel");
-        mb.returns(VOID);
-        mb.addModifiers(PUBLIC);
-        mb.addStatement("this.onCancel = onCancel");
-        return mb.build();
-    }
-
-
-    private MethodSpec setOnSave(TypeElement te) {
-        MethodSpec.Builder mb = MethodSpec.methodBuilder("setOnSave");
-        mb.addAnnotation(Override.class);
-        mb.addParameter(ParameterizedTypeName.get(ClassName.get(Consumer.class), TypeName.get(te.asType())), "onSave");
-        mb.returns(VOID);
-        mb.addModifiers(PUBLIC);
-        mb.addStatement("this.onSave = onSave");
         return mb.build();
     }
 
@@ -262,6 +256,7 @@ public class FormGnrt {
         List<FieldSpec> fss = new ArrayList<>();
         fss.add(FieldSpec.builder(VBOX, "node", PRIVATE).build());
         fss.add(FieldSpec.builder(JFXooFormSnackBar.class, "snackBar", PRIVATE).build());
+        fss.add(FieldSpec.builder(HBOX, "hBox_control", PRIVATE).build());
         fs.forEach(f -> {
             if (f.control == JFXOO_TABLE) {
                 TypeName _type = typeArgs(TypeName.get(f.type)).get(0);
@@ -270,8 +265,6 @@ public class FormGnrt {
                 fss.add(FieldSpec.builder(f.control, f.inputControlName, PRIVATE).build());
             }
         });
-        fss.add(FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), TypeName.get(te.asType())), "onSave", PRIVATE).build());
-        fss.add(FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), ClassName.get(Void.class)), "onCancel", PRIVATE).build());
         return fss;
     }
 
@@ -332,15 +325,10 @@ public class FormGnrt {
             }
         }
 
-        mb.addStatement("$T btn_save = new $T($S)", BUTTON, BUTTON, "Save");
-        mb.addStatement("btn_save.setOnMouseClicked(evt -> { if (onSave != null) onSave.accept(value()); })");
-        mb.addStatement("$T btn_cancel = new $T($S)", BUTTON, BUTTON, "Cancel");
-        mb.addStatement("btn_cancel.setOnMouseClicked(evt -> { if (onCancel != null) onCancel.accept(null); })");
-        mb.addStatement("$T hBox_control = new $T()", HBOX, HBOX);
+        mb.addStatement("hBox_control = new $T()", HBOX);
         mb.addStatement("hBox_control.setSpacing($L)", 4);
         mb.addStatement("hBox_control.setPadding(new $T($L, $L, $L, $L))", INSETS, 10, 10, 10, 10);
         mb.addStatement("hBox_control.setAlignment($T.BASELINE_RIGHT)", POS);
-        mb.addStatement("hBox_control.getChildren().addAll(btn_cancel, btn_save)");
 
         mb.addStatement("$T sp = new $T(grid)", SCROLL_PANE, SCROLL_PANE);
         mb.addStatement("sp.setFitToWidth(true)");
