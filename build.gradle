@@ -1,5 +1,5 @@
 plugins {
-    id 'java'
+    id 'java-library'
     id "maven-publish"
     id 'signing'
     id "io.github.gradle-nexus.publish-plugin" version "1.0.0"
@@ -18,19 +18,32 @@ repositories {
     mavenCentral()
 }
 
+import org.apache.tools.ant.taskdefs.condition.Os
+def jfxClassifier
+task os(){
+    if (Os.isFamily(Os.FAMILY_WINDOWS)) {
+        jfxClassifier = 'win'
+    } else if (Os.isFamily(Os.FAMILY_MAC)) {
+        jfxClassifier = 'mac'
+    } else {
+        jfxClassifier = 'linux'
+    }
+}
+
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.22'
     annotationProcessor 'org.projectlombok:lombok:1.18.22'
     implementation 'com.squareup:javapoet:1.13.0'
-    compileOnly 'org.openjfx:javafx-base:18:linux'
-    compileOnly 'org.openjfx:javafx-controls:18:linux'
-    compileOnly 'org.openjfx:javafx-graphics:18:linux'
+    testImplementation 'com.squareup:javapoet:1.13.0'
+    compileOnly "org.openjfx:javafx-base:18:${jfxClassifier}"
+    compileOnly "org.openjfx:javafx-controls:18:${jfxClassifier}"
+    compileOnly "org.openjfx:javafx-graphics:18:${jfxClassifier}"
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
     testImplementation 'com.google.testing.compile:compile-testing:0.19'
-    testImplementation 'org.openjfx:javafx-base:18:linux'
-    testImplementation 'org.openjfx:javafx-controls:18:linux'
-    testImplementation 'org.openjfx:javafx-graphics:18:linux'
+    testImplementation "org.openjfx:javafx-base:18:${jfxClassifier}"
+    testImplementation "org.openjfx:javafx-controls:18:${jfxClassifier}"
+    testImplementation "org.openjfx:javafx-graphics:18:${jfxClassifier}"
 }
 
 test {
