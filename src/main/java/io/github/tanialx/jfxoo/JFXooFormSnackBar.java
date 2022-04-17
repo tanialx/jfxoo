@@ -69,7 +69,7 @@ public class JFXooFormSnackBar {
                         });
                         return;
                     }
-                    node.getChildren().remove(prev);
+                    Platform.runLater(() -> node.getChildren().remove(prev));
                     timer.cancel();
                 }
             }, 1000, 5);
