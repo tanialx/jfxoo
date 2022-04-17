@@ -53,17 +53,23 @@ public class JFXooFormSnackBar {
             Timer timer = new Timer();
             HBox prev = (HBox) node.getChildren().get(0);
             timer.schedule(new TimerTask() {
+
+                double co = -1;
+
                 @Override
                 public void run() {
-                    if (prev.getOpacity() >= .4) {
+                    if (co == -1) co = prev.getOpacity();
+                    if (co >= .4) {
+                        co -= .01;
                         Platform.runLater(() -> {
-                            double o = prev.getOpacity();
-                            prev.setOpacity(o - .01);
-                            prev.getChildren().forEach( f -> f.setOpacity(o - .01));
+                            if (node.getChildren().contains(prev)) {
+                                prev.setOpacity(co);
+                                prev.getChildren().forEach(f -> f.setOpacity(co));
+                            }
                         });
                         return;
                     }
-                    Platform.runLater(() -> node.getChildren().remove(prev));
+                    node.getChildren().remove(prev);
                     timer.cancel();
                 }
             }, 1000, 5);
