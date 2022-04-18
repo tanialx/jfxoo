@@ -38,6 +38,7 @@ public class FormGnrt {
     @Setter
     public static class Field {
         private String name;
+        private String label;
         private TypeMirror type;
         private String pkg;
         private String inputControlName;
@@ -72,6 +73,7 @@ public class FormGnrt {
             String nameInMethod = Character.toUpperCase(fieldName.charAt(0)) + fieldName.substring(1);
             String setter = String.format("set%s", nameInMethod);
             String inputName = "in_" + fieldName;
+            String label = Helper.labelFormat(fieldName);
 
             // TODO: ui controls for simple data types
             // String   -> TextField
@@ -85,6 +87,9 @@ public class FormGnrt {
                 switch (jfXooVar.type()) {
                     case password -> control = PASSWORD_FIELD;
                     case textarea -> control = TEXTAREA;
+                }
+                if (!jfXooVar.label().isBlank()) {
+                    label = jfXooVar.label();
                 }
             }
             if (control == null) {
@@ -129,6 +134,7 @@ public class FormGnrt {
                     .pkg(elements.getPackageOf(ve).toString())
                     .pLabel(pLabel)
                     .pInput(pInput)
+                    .label(label)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -295,7 +301,7 @@ public class FormGnrt {
         for (Field f : fs) {
             String labelName = "label_" + f.getName();
             String inputName = f.getInputControlName();
-            mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, labelFormat(f.getName()));
+            mb.addStatement("$T $L = new $T($S)", LABEL, labelName, LABEL, f.label);
             if (f.control == JFXOO_TABLE) {
                 String jfxooTableVar = String.format("jfxooTable_%s", f.name);
                 TypeName _type = typeArgs(TypeName.get(f.type)).get(0);

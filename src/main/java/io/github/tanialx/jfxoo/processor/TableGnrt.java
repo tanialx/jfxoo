@@ -2,6 +2,7 @@ package io.github.tanialx.jfxoo.processor;
 
 import com.squareup.javapoet.*;
 import io.github.tanialx.jfxoo.JFXooTable;
+import io.github.tanialx.jfxoo.annotation.JFXooVar;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.TypeElement;
@@ -98,7 +99,12 @@ public class TableGnrt {
             String name = v.getSimpleName().toString();
             String colVar = String.format("c_%s", v.getSimpleName().toString());
             String getter = String.format("get%s", Character.toUpperCase(name.charAt(0)) + name.substring(1));
-            mb.addStatement("$T<$T, $T> $L = new $T<>($S)", TABLE_COLUMN, te.asType(), v.asType(), colVar, TABLE_COLUMN, Helper.labelFormat(name));
+            String label = Helper.labelFormat(name);
+            JFXooVar jfXooVar = v.getAnnotation(JFXooVar.class);
+            if (jfXooVar != null && !jfXooVar.label().isBlank()) {
+                label = jfXooVar.label();
+            }
+            mb.addStatement("$T<$T, $T> $L = new $T<>($S)", TABLE_COLUMN, te.asType(), v.asType(), colVar, TABLE_COLUMN, label);
             mb.addStatement("$L.setCellValueFactory(p -> new $T<>(p.getValue().$L()))", colVar, SIMPLE_OBJECT_PROPERTY, getter);
             cols.add(colVar);
         });

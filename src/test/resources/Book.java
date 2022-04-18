@@ -14,10 +14,12 @@ import java.util.List;
 public class Book {
     private String title;
     private String author;
+    @JFXooVar(label = "Published on")
     private LocalDate publishedDate;
     private BigDecimal price;
     @JFXooVar(type = JFXooVarType.textarea)
     private String summary;
+    @JFXooVar(label = "Public domain")
     private Boolean isInPublicDomain;
     private List<Review> reviews;
 

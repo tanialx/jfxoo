@@ -36,7 +36,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
         TableColumn<Book, String> c_author = new TableColumn<>("Author");
         c_author.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getAuthor()));
 
-        TableColumn<Book, LocalDate> c_publishedDate = new TableColumn<>("Published Date");
+        TableColumn<Book, LocalDate> c_publishedDate = new TableColumn<>("Published on");
         c_publishedDate.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getPublishedDate()));
 
         TableColumn<Book, BigDecimal> c_price = new TableColumn<>("Price");
@@ -45,7 +45,7 @@ public class JFXooTableBook implements JFXooTable<Book> {
         TableColumn<Book, String> c_summary = new TableColumn<>("Summary");
         c_summary.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getSummary()));
 
-        TableColumn<Book, Boolean> c_isInPublicDomain = new TableColumn<>("Is In Public Domain");
+        TableColumn<Book, Boolean> c_isInPublicDomain = new TableColumn<>("Public domain");
         c_isInPublicDomain.setCellValueFactory(p -> new SimpleObjectProperty<>(p.getValue().getIsInPublicDomain()));
 
         table.getColumns().addAll(Arrays.asList(c_title, c_author, c_publishedDate, c_price, c_summary, c_isInPublicDomain));

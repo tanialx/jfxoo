@@ -81,7 +81,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         grid.add(in_author, 1, 2, 1, 1);
         GridPane.setHgrow(in_author, Priority.ALWAYS);
 
-        Label label_publishedDate = new Label("Published Date");
+        Label label_publishedDate = new Label("Published on");
         in_publishedDate = new DatePicker();
         grid.add(label_publishedDate, 0, 3, 1, 1);
         grid.add(in_publishedDate, 1, 3, 1, 1);
@@ -100,7 +100,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         grid.add(in_summary, 1, 5, 1, 1);
         GridPane.setHgrow(in_summary, Priority.ALWAYS);
 
-        Label label_isInPublicDomain = new Label("Is In Public Domain");
+        Label label_isInPublicDomain = new Label("Public domain");
         in_isInPublicDomain = new CheckBox();
         grid.add(label_isInPublicDomain, 0, 6, 1, 1);
         grid.add(in_isInPublicDomain, 1, 6, 1, 1);

@@ -8,5 +8,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target(ElementType.FIELD)
 public @interface JFXooVar {
-    JFXooVarType type();
+    JFXooVarType type() default JFXooVarType._auto;
+    String label() default "";
 }
