@@ -5,6 +5,7 @@ import io.github.tanialx.jfxoo.JFXooFormSnackBar;
 import java.lang.Override;
 import java.lang.String;
 import java.math.BigDecimal;
+import java.util.Optional;
 import java.util.function.Consumer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -129,7 +130,7 @@ public class JFXooFormBook implements JFXooForm<Book> {
         in_title.setText(book.getTitle());
         in_author.setText(book.getAuthor());
         in_publishedDate.setValue(book.getPublishedDate());
-        in_price.setText(book.getPrice().toString());
+        in_price.setText(Optional.ofNullable(book.getPrice()).map(o -> o.toString()).orElse(""));
         in_summary.setText(book.getSummary());
         in_isInPublicDomain.setSelected(book.getIsInPublicDomain());
         in_reviews.getItems().setAll(book.getReviews());

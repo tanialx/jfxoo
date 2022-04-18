@@ -17,6 +17,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -247,7 +248,8 @@ public class FormGnrt {
                 if (sameType(f.type, String.class)) {
                     mb.addStatement("$L.setText($L.$L())", inputName, paramName, getter);
                 } else {
-                    mb.addStatement("$L.setText($L.$L().toString())", inputName, paramName, getter);
+                    mb.addStatement("$L.setText($T.ofNullable($L.$L()).map(o -> o.toString()).orElse($S))", inputName,
+                            Optional.class, paramName, getter, "");
                 }
             } else if (f.control == CHECKBOX) {
                 mb.addStatement("$L.setSelected($L.$L())", inputName, paramName, getter);
