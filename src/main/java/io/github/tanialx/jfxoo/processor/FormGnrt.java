@@ -24,7 +24,8 @@ import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeName.VOID;
 import static io.github.tanialx.jfxoo.processor.CLSName.*;
-import static io.github.tanialx.jfxoo.processor.Helper.*;
+import static io.github.tanialx.jfxoo.processor.Helper.isFromType;
+import static io.github.tanialx.jfxoo.processor.Helper.typeArgs;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 
