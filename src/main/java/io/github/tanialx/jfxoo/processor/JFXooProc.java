@@ -18,8 +18,6 @@ import java.util.Set;
 
 public class JFXooProc extends AbstractProcessor {
 
-    private List<TypeElement> forms = new ArrayList<>();
-    private List<TypeElement> table = new ArrayList<>();
     private CreatorGnrt creatorGnrt;
     private FormGnrt formGnrt;
     private TableGnrt tableGnrt;
@@ -34,34 +32,31 @@ public class JFXooProc extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+
         /*
          * Generate code for JFXoo supported annotations
          * - JFXooForm
          * - JFXooTable
          */
-        if (!roundEnv.processingOver()) {
-            forms.addAll(roundEnv.getElementsAnnotatedWith(JFXooForm.class)
-                    .stream()
-                    .filter(e -> e.getKind() == ElementKind.CLASS)
-                    .map(e -> (TypeElement) e).toList());
-            table.addAll(roundEnv.getElementsAnnotatedWith(JFXooTable.class)
-                    .stream()
-                    .filter(e -> e.getKind() == ElementKind.CLASS)
-                    .map(e -> (TypeElement) e).toList());
-        } else {
-            forms.forEach(te -> {
-                this.output(formGnrt.run(te));
-                creatorGnrt.form(te);
-            });
-            forms.clear();
-            table.forEach(te -> {
-                this.output(tableGnrt.run(te));
-                creatorGnrt.table(te);
-            });
-            table.clear();
-            if (creatorGnrt.pending()) {
-                this.output(creatorGnrt.run());
-            }
+        List<TypeElement> forms = new ArrayList<>(roundEnv.getElementsAnnotatedWith(JFXooForm.class)
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.CLASS)
+                .map(e -> (TypeElement) e).toList());
+        List<TypeElement> table = new ArrayList<>(roundEnv.getElementsAnnotatedWith(JFXooTable.class)
+                .stream()
+                .filter(e -> e.getKind() == ElementKind.CLASS)
+                .map(e -> (TypeElement) e).toList());
+        forms.forEach(te -> {
+            this.output(formGnrt.run(te));
+            creatorGnrt.form(te);
+        });
+        table.forEach(te -> {
+            this.output(tableGnrt.run(te));
+            creatorGnrt.table(te);
+        });
+        if (creatorGnrt.pending()) {
+            this.output(creatorGnrt.run());
+            creatorGnrt.clear();
         }
         return false;
     }

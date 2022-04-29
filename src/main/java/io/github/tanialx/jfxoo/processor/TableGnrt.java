@@ -115,32 +115,6 @@ public class TableGnrt {
         String simpleName = te.getSimpleName().toString();
         ClassName jfxooFormClassname = ClassName.get(elements.getPackageOf(te).toString(), "JFXooForm" + simpleName);
 
-        mb.addStatement(CodeBlock.builder()
-                .add("table.setRowFactory(tv -> {\n")
-                .add("$T<$T> row = new $T<>();\n", TABLE_ROW, te.asType(), TABLE_ROW)
-                .add("row.setOnMouseClicked(evt -> {\n")
-                .add("if (!row.isEmpty() && evt.getButton() == $T.PRIMARY && evt.getClickCount() == 2) {\n", MOUSE_BUTTON)
-                .add("$T selected = row.getItem();\n", te.asType())
-                .add("$T s = new $T();\n", STAGE, STAGE)
-                .add("$T f = new $T();\n", jfxooFormClassname, jfxooFormClassname)
-                .add("f.init(selected);\n")
-                .add("f.button($S, _f -> {\n", "Save")
-                .add("int idx = table.getItems().indexOf(selected);\n")
-                .add("table.getItems().remove(selected);\n")
-                .add("table.getItems().add(idx, _f);\n")
-                .add("s.close();\n")
-                .add("});\n")
-                .add("f.button($S, _f -> s.close());\n", "Cancel")
-                .add("$T scene = new $T(f.node());\n", SCENE, SCENE)
-                .add("s.setScene(scene);\n")
-                .add("s.setTitle(\"Edit\");\n")
-                .add("s.show();\n")
-                .add("}\n")
-                .add("});\n")
-                .add("return row;\n")
-                .add("})")
-                .build());
-
         mb.addStatement("control = new $T()", HBOX);
         mb.addStatement("control.setSpacing($L)", 4);
         mb.addStatement("$T btnADD = new $T($S)", BUTTON, BUTTON, "Add");
@@ -149,6 +123,7 @@ public class TableGnrt {
         mb.addStatement(CodeBlock.builder()
                 .add("btnADD.setOnMouseClicked(evt -> {\n")
                 .add("$T s = new $T();\n", STAGE, STAGE)
+                .add("s.initOwner(node.getScene().getWindow());\n")
                 .add("$T f = new $T();\n", jfxooFormClassname, jfxooFormClassname)
                 .add("f.button($S, _f -> {\n" +
                         "                table.getItems().add(_f);\n" +
@@ -156,6 +131,7 @@ public class TableGnrt {
                         "            });\n", "Save")
                 .add(" f.button($S, _f -> s.close());\n", "Cancel")
                 .add("$T scene = new $T(f.node());\n", SCENE, SCENE)
+                .add("scene.getStylesheets().addAll(node.getScene().getStylesheets());\n")
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle($S);\n", "Add")
                 .add("s.show();\n")
@@ -166,6 +142,7 @@ public class TableGnrt {
                 .add("$T selected = table.getSelectionModel().getSelectedItem();\n", te.asType())
                 .add("if (selected == null) return;\n")
                 .add("$T s = new $T();\n", STAGE, STAGE)
+                .add("s.initOwner(node.getScene().getWindow());\n")
                 .add("$T f = new $T();\n", jfxooFormClassname, jfxooFormClassname)
                 .add("f.init(selected);\n")
                 .add("f.button($S, _f -> {\n", "Save")
@@ -176,6 +153,7 @@ public class TableGnrt {
                 .add("});\n")
                 .add("f.button($S, _f -> s.close());\n", "Cancel")
                 .add("$T scene = new $T(f.node());\n", SCENE, SCENE)
+                .add("scene.getStylesheets().addAll(node.getScene().getStylesheets());\n")
                 .add("s.setScene(scene);\n")
                 .add("s.setTitle(\"Edit\");\n")
                 .add("s.show();\n")

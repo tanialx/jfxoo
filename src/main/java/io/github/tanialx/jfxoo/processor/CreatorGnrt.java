@@ -25,6 +25,11 @@ public class CreatorGnrt {
         this.procEnv = procEnv;
     }
 
+    public void clear() {
+        table.clear();
+        forms.clear();
+    }
+
     public boolean pending() {
         return !forms.isEmpty() || !table.isEmpty();
     }
